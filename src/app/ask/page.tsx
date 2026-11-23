@@ -18,7 +18,8 @@ export default function AskPage() {
         <p>
           Common rep questions are answered from a bank of {ANSWER_BANK.length} approved answers, word for word, followed by one offer:
           &ldquo;Want to know why this works?&rdquo; Everything else falls back to search over the training documents and returns the exact source
-          line with its citation. If nothing approved fits, the coach says so instead of giving generic advice.
+          line with its citation. When two lines fit equally, the coach asks which situation it is. If nothing approved fits, it says so instead of
+          giving generic advice.
         </p>
       </PageHeader>
       <AskConsole
@@ -40,7 +41,7 @@ export default function AskPage() {
                     <span className="min-w-0">
                       <span className="font-medium">{doc.title}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {doc.sections.length} sections · {doc.code} · approved {doc.approvedOn}
+                        {doc.sections.length} sections · {doc.code} · {doc.channel === "any" ? "calls and email" : doc.channel === "call" ? "calls" : "email"} · approved {doc.approvedOn}
                         {current ? "" : " · never searched"}
                       </span>
                     </span>
