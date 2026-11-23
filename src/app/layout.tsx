@@ -9,6 +9,10 @@ const sans = Geist({ variable: "--font-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  // Makes the social card's URL absolute. The card itself is src/app/opengraph-image.png (design/og.py).
+  metadataBase: new URL("https://llm-reliability-kit.vercel.app"),
+  openGraph: { siteName: "Coach reliability kit", type: "website" },
+  twitter: { card: "summary_large_image" },
   title: {
     default: "Coach reliability kit",
     template: "%s · Coach reliability kit",

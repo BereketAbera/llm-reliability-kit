@@ -1,0 +1,1 @@
+Three reps ask at once. Today, 2 of 3 are answered: Rep 1 and Rep 2 fill the 30,000-token minute and Rep 3 gets a 429. With the retry queue, 3 of 3. Simulated provider, fictional sales method.
