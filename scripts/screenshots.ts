@@ -27,7 +27,7 @@ async function scrollTo(page: Page, selector: string, closest?: string) {
 
 async function runBurst(page: Page) {
   await page.getByRole("button", { name: "Run live" }).click();
-  await page.getByText(/^Done\. Naive answered/).waitFor({ state: "attached", timeout: 60_000 });
+  await page.getByText(/^Done\. Today's client answered/).waitFor({ state: "attached", timeout: 60_000 });
   await page.waitForTimeout(400);
 }
 
