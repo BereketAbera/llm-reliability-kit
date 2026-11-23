@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, CircleHelp, Loader2, Search, ShieldCheck, Sparkles } from "lucide-react";
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ const PATH_LABEL: Record<CoachAnswer["path"], string> = {
   "no-match": "No approved line",
 };
 
-export function AskConsole({ initialAnswer }: { initialAnswer: CoachAnswer }) {
+export function AskConsole({ initialAnswer, library }: { initialAnswer: CoachAnswer; library?: ReactNode }) {
   const [question, setQuestion] = useState("");
   const [paraphrase, setParaphrase] = useState(false);
   const [answer, setAnswer] = useState<CoachAnswer | null>(initialAnswer);
@@ -87,7 +87,7 @@ export function AskConsole({ initialAnswer }: { initialAnswer: CoachAnswer }) {
   const shown = answer ?? null;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+    <div id="ask-grid" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
       <section aria-labelledby="ask-title" className="space-y-5">
         <form onSubmit={onSubmit} className="rounded-xl border bg-background p-4 sm:p-5">
           <h2 id="ask-title" className="sr-only">
@@ -149,7 +149,7 @@ export function AskConsole({ initialAnswer }: { initialAnswer: CoachAnswer }) {
           </ul>
         </div>
 
-        {shown ? <Trace answer={shown} /> : null}
+        {library}
       </section>
 
       <section aria-labelledby="answer-title" aria-live="polite" aria-busy={loading} className="space-y-4">
@@ -212,6 +212,7 @@ export function AskConsole({ initialAnswer }: { initialAnswer: CoachAnswer }) {
         </div>
 
         {shown && shown.path !== "no-match" ? <GuardCard answer={shown} /> : null}
+        {shown ? <Trace answer={shown} /> : null}
       </section>
     </div>
   );

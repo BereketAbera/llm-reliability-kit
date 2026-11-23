@@ -16,6 +16,15 @@ async function settle(page: Page) {
   await page.waitForTimeout(300);
 }
 
+/** Scrolls so the element (or its closest `closest` ancestor) sits just under the header. */
+async function scrollTo(page: Page, selector: string, closest?: string) {
+  await page.locator(selector).first().evaluate((el, ancestor) => {
+    const target = (ancestor ? el.closest(ancestor) : null) ?? el;
+    window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY - 84);
+  }, closest);
+  await page.waitForTimeout(200);
+}
+
 async function runBurst(page: Page) {
   await page.getByRole("button", { name: "Run live" }).click();
   await page.getByText(/^Done\. Naive answered/).waitFor({ state: "attached", timeout: 60_000 });
@@ -32,24 +41,22 @@ async function main() {
   await page.goto(`${base}/burst`);
   await settle(page);
   await runBurst(page);
-  await page.locator("#why-title").evaluate((el) => {
-    const card = el.closest("section") ?? el;
-    window.scrollTo(0, card.getBoundingClientRect().top + window.scrollY - 76);
-  });
-  await page.waitForTimeout(200);
+  await scrollTo(page, "#why-title", "section");
   await page.screenshot({ path: file("burst-desktop") });
 
   await page.goto(`${base}/ask`);
   await settle(page);
   await page.getByLabel("What is happening on your call?").fill("They told me there's no budget for this until next year");
   await page.getByRole("button", { name: "Ask the coach" }).click();
-  await page.getByText("Contains", { exact: false }).first().waitFor({ state: "detached", timeout: 1 }).catch(() => undefined);
+  await page.locator("blockquote").filter({ hasText: "When is the next budget set" }).waitFor();
   await page.getByRole("button", { name: "Want to know why this works?" }).click();
   await page.waitForTimeout(400);
+  await scrollTo(page, "#ask-grid");
   await page.screenshot({ path: file("ask-desktop") });
 
   await page.goto(`${base}/eval`);
   await settle(page);
+  await scrollTo(page, "#score-title", "section");
   await page.screenshot({ path: file("eval-desktop") });
 
   await page.goto(`${base}/monitoring`);

@@ -21,36 +21,39 @@ export default function AskPage() {
           line with its citation. If nothing approved fits, the coach says so instead of giving generic advice.
         </p>
       </PageHeader>
-      <AskConsole initialAnswer={example} />
-
-      <section aria-labelledby="library-title" className="mt-10 rounded-xl border bg-background p-4 sm:p-5">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-          <h2 id="library-title" className="text-xl font-semibold tracking-tight">
-            Document library
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {CATALOG.documents.length} current documents · {CATALOG.scripts.length} approved lines · {CATALOG.excluded.length} superseded version excluded ·{" "}
-            {issues.length === 0 ? "no duplicates" : `${issues.length} issues`}
-          </p>
-        </div>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[...CATALOG.documents, ...CATALOG.excluded].map((doc) => {
-            const current = CATALOG.documents.includes(doc);
-            return (
-              <li key={`${doc.slug}-${doc.version}`} className={current ? "rounded-lg border p-3" : "rounded-lg border border-dashed p-3 text-muted-foreground"}>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium">{doc.title}</p>
-                  <Badge variant={current ? "secondary" : "outline"}>{current ? `v${doc.version} current` : `v${doc.version} superseded`}</Badge>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {doc.sections.length} sections · code {doc.code} · approved {doc.approvedOn}
-                  {current ? "" : " · never searched"}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <AskConsole
+        initialAnswer={example}
+        library={
+          <section aria-labelledby="library-title" className="rounded-xl border bg-background p-4 sm:p-5">
+            <h2 id="library-title" className="text-base font-semibold">
+              Document library
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {CATALOG.documents.length} current documents · {CATALOG.scripts.length} approved lines · {CATALOG.excluded.length} superseded version excluded ·{" "}
+              {issues.length === 0 ? "no duplicates" : `${issues.length} issues`}
+            </p>
+            <ul className="mt-3 divide-y text-sm">
+              {[...CATALOG.documents, ...CATALOG.excluded].map((doc) => {
+                const current = CATALOG.documents.includes(doc);
+                return (
+                  <li key={`${doc.slug}-${doc.version}`} className={current ? "flex items-center justify-between gap-3 py-2" : "flex items-center justify-between gap-3 py-2 text-muted-foreground"}>
+                    <span className="min-w-0">
+                      <span className="font-medium">{doc.title}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {doc.sections.length} sections · {doc.code} · approved {doc.approvedOn}
+                        {current ? "" : " · never searched"}
+                      </span>
+                    </span>
+                    <Badge variant={current ? "secondary" : "outline"} className="shrink-0">
+                      {current ? `v${doc.version} current` : `v${doc.version} superseded`}
+                    </Badge>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        }
+      />
     </>
   );
 }

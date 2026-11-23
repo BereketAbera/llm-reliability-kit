@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { ErrorRateChart } from "@/components/monitoring/error-rate-chart";
 import { LocalRuns } from "@/components/monitoring/local-runs";
 import { PageHeader, Stat } from "@/components/site/page-header";
-import { Badge } from "@/components/ui/badge";
 import { percent, seconds } from "@/lib/format";
 import { ALERT_RULES, DEPLOY_MINUTE, clockLabel, monitoringSnapshot, type RunRecord } from "@/lib/monitoring/monitor";
 import { cn } from "@/lib/utils";
@@ -53,55 +52,74 @@ export default function MonitoringPage() {
         <Stat label="Alerts" value={snapshot.alerts.length} hint={`${critical.length} critical, ${criticalAfter === 0 ? "all before the fix" : `${criticalAfter} after the fix`}`} tone="warn" />
       </dl>
 
-      <section aria-labelledby="rate-title" className="mt-8 rounded-xl border bg-background p-4 sm:p-5">
-        <h2 id="rate-title" className="text-xl font-semibold tracking-tight">
-          Error rate over time
-        </h2>
-        <p className="mt-1 mb-4 text-sm text-muted-foreground">15-minute windows. A failed answer is one the rep never got; a calm &ldquo;busy, retry&rdquo; is counted separately.</p>
-        <ErrorRateChart buckets={snapshot.buckets} />
-      </section>
+      <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
+        <section aria-labelledby="rate-title" className="min-w-0 rounded-xl border bg-background p-4 sm:p-5">
+          <h2 id="rate-title" className="text-xl font-semibold tracking-tight">
+            Error rate over time
+          </h2>
+          <p className="mt-1 mb-4 text-sm text-muted-foreground">15-minute windows. A failed answer is one the rep never got; a calm &ldquo;busy, retry&rdquo; is counted separately.</p>
+          <ErrorRateChart buckets={snapshot.buckets} />
+        </section>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <section aria-labelledby="alerts-title" className="rounded-xl border bg-background p-4 sm:p-5">
+        <section aria-labelledby="alerts-title" className="min-w-0 rounded-xl border bg-background p-4 sm:p-5">
           <h2 id="alerts-title" className="text-xl font-semibold tracking-tight">
             Alerts
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Newest first. Simulated: in production these post to a chat channel or email through a webhook.</p>
-          <ol className="mt-4 space-y-3">
-            {snapshot.alerts.slice(0, 9).map((alert, index) => (
-              <li key={`${alert.ruleId}-${alert.firedAt}-${index}`} className="flex gap-3 rounded-lg border p-3">
-                <span
-                  className={cn(
-                    "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full",
-                    alert.severity === "critical" ? "bg-bad-soft text-bad" : alert.severity === "warning" ? "bg-warn-soft text-warn" : "bg-info-soft text-info",
-                  )}
-                >
-                  {alert.severity === "critical" ? <BellRing className="size-3.5" aria-hidden /> : alert.severity === "warning" ? <TriangleAlert className="size-3.5" aria-hidden /> : <Info className="size-3.5" aria-hidden />}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-medium">{alert.title}</span>
-                    <Badge variant="outline" className="font-normal capitalize">
-                      {alert.severity}
-                    </Badge>
-                  </p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{alert.detail}</p>
-                  <p className="mt-1 text-xs text-muted-foreground tabular">
-                    Fired {clockLabel(alert.firedAt)}
-                    {alert.resolvedAt !== undefined && alert.resolvedAt !== alert.firedAt ? ` · resolved ${clockLabel(alert.resolvedAt)}` : ""}
-                  </p>
-                </div>
+          <p className="mt-1 text-sm text-muted-foreground">By rule, then the latest. Simulated: in production these post to a chat channel or email through a webhook.</p>
+          <ul className="mt-3 divide-y rounded-lg border">
+            {ALERT_RULES.map((rule) => {
+              const fired = snapshot.alerts.filter((a) => a.ruleId === rule.id);
+              const last = fired[0];
+              return (
+                <li key={rule.id} className="flex items-start gap-2.5 p-2.5">
+                  <span
+                    className={cn(
+                      "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full",
+                      rule.severity === "critical" ? "bg-bad-soft text-bad" : rule.severity === "warning" ? "bg-warn-soft text-warn" : "bg-info-soft text-info",
+                    )}
+                  >
+                    {rule.severity === "critical" ? <BellRing className="size-3.5" aria-hidden /> : rule.severity === "warning" ? <TriangleAlert className="size-3.5" aria-hidden /> : <Info className="size-3.5" aria-hidden />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-baseline justify-between gap-x-2">
+                      <span className="text-sm font-medium">
+                        {rule.name} <span className="text-xs font-normal text-muted-foreground capitalize">{rule.severity}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground tabular">
+                        {fired.length === 0 ? "never fired" : `${fired.length}× · last ${clockLabel(last.firedAt)}`}
+                      </span>
+                    </p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{last ? last.title : rule.description}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <h3 className="mt-4 text-xs font-medium tracking-wide text-muted-foreground uppercase">Latest</h3>
+          <ol className="mt-2 space-y-2">
+            {snapshot.alerts.slice(0, 3).map((alert, index) => (
+              <li key={`${alert.ruleId}-${alert.firedAt}-${index}`} className="text-sm">
+                <p className="flex items-baseline justify-between gap-2">
+                  <span className="font-medium">{alert.title}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground tabular">{clockLabel(alert.firedAt)}</span>
+                </p>
+                <p className="line-clamp-2 text-xs text-muted-foreground">
+                  <span className="sr-only">{alert.severity}: </span>
+                  {alert.detail}
+                </p>
               </li>
             ))}
           </ol>
-          <p className="mt-3 text-xs text-muted-foreground">Showing 9 of {snapshot.alerts.length}.</p>
+          <p className="mt-3 text-xs text-muted-foreground">{snapshot.alerts.length} alerts in the simulated day.</p>
         </section>
+      </div>
 
-        <div className="space-y-6">
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <section aria-labelledby="rules-title" className="rounded-xl border bg-background p-4 sm:p-5">
             <h2 id="rules-title" className="text-base font-semibold">
               Alert rules
             </h2>
+            <p className="mt-1 text-sm text-muted-foreground">Evaluated over the run log of every answer.</p>
             <ul className="mt-3 space-y-2.5 text-sm">
               {ALERT_RULES.map((rule) => (
                 <li key={rule.id}>
@@ -112,7 +130,6 @@ export default function MonitoringPage() {
             </ul>
           </section>
           <LocalRuns />
-        </div>
       </div>
 
       <section aria-labelledby="log-title" className="mt-8">

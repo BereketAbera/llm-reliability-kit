@@ -2,9 +2,9 @@ import { BUCKET_MINUTES, DAY_MINUTES, DEPLOY_MINUTE, ERROR_RATE_THRESHOLD, clock
 
 /** Bars: requests per 15 minutes. Line: error rate. Dashed: 5% alert threshold. */
 export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
-  const width = 960;
-  const height = 280;
-  const pad = { top: 16, right: 44, bottom: 30, left: 40 };
+  const width = 640;
+  const height = 300;
+  const pad = { top: 18, right: 36, bottom: 30, left: 58 };
   const innerW = width - pad.left - pad.right;
   const innerH = height - pad.top - pad.bottom;
   const maxRequests = Math.max(...buckets.map((b) => b.requests), 1);
@@ -29,13 +29,13 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
         {[0, 0.1, 0.2, 0.3, 0.4].map((rate) => (
           <g key={rate}>
             <line x1={pad.left} x2={width - pad.right} y1={yRate(rate)} y2={yRate(rate)} className="stroke-border" strokeWidth={1} />
-            <text x={pad.left - 8} y={yRate(rate) + 4} textAnchor="end" className="fill-muted-foreground text-[11px]">
+            <text x={pad.left - 8} y={yRate(rate) + 4} textAnchor="end" className="fill-muted-foreground text-[20px] sm:text-[11px]">
               {Math.round(rate * 100)}%
             </text>
           </g>
         ))}
         {[0, Math.round(maxRequests / 2), maxRequests].map((n) => (
-          <text key={n} x={width - pad.right + 8} y={yReq(n) + 4} className="fill-muted-foreground text-[11px]">
+          <text key={n} x={width - pad.right + 6} y={yReq(n) + 4} className="fill-muted-foreground text-[20px] sm:text-[11px]">
             {n}
           </text>
         ))}
@@ -43,19 +43,25 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
           <rect key={b.start} x={x(b.start) + 1} y={yReq(b.requests)} width={barW} height={pad.top + innerH - yReq(b.requests)} className="fill-seg-queued" rx={1.5} />
         ))}
         <line x1={pad.left} x2={width - pad.right} y1={yRate(ERROR_RATE_THRESHOLD)} y2={yRate(ERROR_RATE_THRESHOLD)} className="stroke-warn" strokeDasharray="5 4" strokeWidth={1.5} />
-        <text x={width - pad.right - 4} y={yRate(ERROR_RATE_THRESHOLD) - 6} textAnchor="end" className="fill-warn text-[11px] font-medium">
+        <text x={width - pad.right - 4} y={yRate(ERROR_RATE_THRESHOLD) - 6} textAnchor="end" className="fill-warn text-[20px] font-medium sm:text-[11px]">
           alert at 5%
         </text>
         <line x1={x(DEPLOY_MINUTE)} x2={x(DEPLOY_MINUTE)} y1={pad.top} y2={pad.top + innerH} className="stroke-primary" strokeWidth={1.5} />
-        <text x={x(DEPLOY_MINUTE) + 6} y={pad.top + 12} className="fill-primary text-[11px] font-medium">
-          {clockLabel(DEPLOY_MINUTE)} resilient client shipped
+        <text x={x(DEPLOY_MINUTE) + 6} y={pad.top + 12} className="fill-primary text-[20px] font-medium sm:text-[11px]">
+          {clockLabel(DEPLOY_MINUTE)} fix shipped
         </text>
-        <path d={line} fill="none" className="stroke-bad" strokeWidth={2.25} strokeLinejoin="round" />
+        <path d={line} fill="none" className="stroke-bad" strokeWidth={2} strokeLinejoin="round" />
         {buckets.map((b) =>
-          b.failed > 0 ? <circle key={`p${b.start}`} cx={x(b.start) + barW / 2 + 1} cy={yRate(b.errorRate)} r={2.5} className="fill-bad" /> : null,
+          b.failed > 0 ? <circle key={`p${b.start}`} cx={x(b.start) + barW / 2 + 1} cy={yRate(b.errorRate)} r={2.25} className="fill-bad" /> : null,
         )}
-        {hours.map((m) => (
-          <text key={m} x={x(m)} y={height - 8} textAnchor="middle" className="fill-muted-foreground text-[11px]">
+        {hours.map((m, i) => (
+          <text
+            key={m}
+            x={x(m)}
+            y={height - 8}
+            textAnchor="middle"
+            className={i % 3 === 0 ? "fill-muted-foreground text-[20px] sm:text-[11px]" : "hidden fill-muted-foreground sm:inline sm:text-[11px]"}
+          >
             {clockLabel(m)}
           </text>
         ))}
