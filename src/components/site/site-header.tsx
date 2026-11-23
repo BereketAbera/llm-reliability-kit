@@ -1,11 +1,12 @@
 "use client";
 
-import { Menu, ShieldCheck, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Dialog } from "radix-ui";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "./brand-mark";
 import { NAV_LINKS } from "./nav-links";
 
 export function SiteHeader() {
@@ -14,10 +15,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:gap-6">
-        <Link href="/" className="flex items-center gap-2.5 rounded-md font-semibold tracking-tight">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <ShieldCheck className="size-4.5" aria-hidden />
-          </span>
+        <Link href="/" className="flex items-center gap-1.5 rounded-md font-semibold tracking-tight">
+          {/* -ml-1 lines the bars up with the page's left edge; the mark's grid has a 4-unit margin. */}
+          <BrandMark className="-ml-1 size-8 shrink-0" />
           <span>Coach reliability kit</span>
         </Link>
         <nav aria-label="Main" className="hidden lg:block">

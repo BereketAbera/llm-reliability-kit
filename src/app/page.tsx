@@ -1,4 +1,4 @@
-import { ArrowRight, BellRing, BookOpenCheck, Gauge, ListChecks } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CardTitle, SectionTitle } from "@/components/site/page-header";
@@ -16,14 +16,11 @@ export const dynamic = "force-static";
 
 const linkClass = "inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline";
 
-function Card({ icon, eyebrow, question, answer, links, children }: { icon: ReactNode; eyebrow: string; question: string; answer: string; links: Array<{ href: string; label: string }>; children?: ReactNode }) {
+function Card({ eyebrow, question, answer, links, children }: { eyebrow: string; question: string; answer: string; links: Array<{ href: string; label: string }>; children?: ReactNode }) {
   return (
     <article className="flex flex-col rounded-xl border bg-background p-5">
-      <div className="flex items-center gap-3">
-        <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">{icon}</span>
-        <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{eyebrow}</span>
-      </div>
-      <h2 className="mt-4 text-lg leading-snug font-semibold text-balance xl:min-h-[3lh]">{question}</h2>
+      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{eyebrow}</p>
+      <h2 className="mt-2 text-lg leading-snug font-semibold text-balance xl:min-h-[3lh]">{question}</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{answer}</p>
       {children ? <div className="mt-3">{children}</div> : null}
       <div className="mt-auto flex flex-col items-start gap-1.5 pt-5">
@@ -141,7 +138,6 @@ export default async function HomePage() {
 
       <section aria-label="The questions this demo answers" className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card
-          icon={<Gauge className="size-5" aria-hidden />}
           eyebrow="Your question 2"
           question="Why do one in three requests fail when three reps ask at once?"
           answer={`Three prompts of ${thousands(DEFAULT_PARAMS.promptTokens)} tokens plus ${thousands(DEFAULT_PARAMS.maxOutputTokens)} output tokens need ${thousands(3 * perRequest)} tokens in the same minute. An assumed ${thousands(DEFAULT_PARAMS.tpm)} tokens-per-minute limit fits two; the third gets a 429.`}
@@ -151,7 +147,6 @@ export default async function HomePage() {
           ]}
         />
         <Card
-          icon={<BookOpenCheck className="size-5" aria-hidden />}
           eyebrow="Your question 3"
           question="How does the coach use the exact approved lines?"
           answer={`Common questions hit a bank of ${ANSWER_BANK.length} approved answers returned exactly as stored. Everything else finds the exact source line by ID, a verbatim check restores it if a model rewrites it, and when two lines fit the coach asks which one.`}
@@ -167,14 +162,12 @@ export default async function HomePage() {
           </ul>
         </Card>
         <Card
-          icon={<ListChecks className="size-5" aria-hidden />}
           eyebrow="Task 4: the regression test"
           question="How do we know a change didn't make answers worse?"
           answer={`Thirty fictional questions scored on exact lines before every publish: ${evalRun.suite.score}/30 today. A change that lets the model paraphrase drops it to ${bad.suite.score}/30, and the gate blocks it. ${evalRun.heldOut.total} held-out phrasings get ${evalRun.heldOut.outcomes["wrong-line"]} wrong lines.`}
           links={[{ href: "/eval", label: "See the 30-question test" }]}
         />
         <Card
-          icon={<BellRing className="size-5" aria-hidden />}
           eyebrow="Task 5: monitoring"
           question="How would we notice failures in production?"
           answer="Each answer is logged with its path, outcome and wait. Alerts fire on unanswered questions and on the error rate, with a simple error-rate view. The page shows an illustrative day of simulated traffic run through the same clients."
