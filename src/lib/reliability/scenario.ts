@@ -62,7 +62,7 @@ export const PRESETS: Preset[] = [
     key: "post",
     label: "Three at once",
     description:
-      "The scenario in your post: three reps ask together with prompts of about 14,500 tokens. The 30,000 tokens-per-minute limit is an assumption (Tier 1 for gpt-4o-class models); the x-ratelimit-limit-tokens header on one of your 429s confirms the real number.",
+      "The scenario in your post: three reps ask together with prompts of about 14,500 tokens. The 30,000 tokens-per-minute limit is an assumption; the x-ratelimit-limit-tokens header on one of your 429s confirms the real number.",
     params: DEFAULT_PARAMS,
   },
   {

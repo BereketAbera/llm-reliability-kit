@@ -17,9 +17,8 @@ import type { ChatMessage, ChatRequestBody, RateLimits, Transport, Usage } from 
 
 export const CHAT_URL = "https://api.openai.com/v1/chat/completions";
 /**
- * The scenario assumes a 30,000 tokens-per-minute limit, which is what OpenAI's
- * Tier 1 listed for gpt-4o-class models (gpt-4o-mini had far more). Confirm the
- * real number from x-ratelimit-limit-tokens on one of your own 429s.
+ * The scenario assumes a 30,000 tokens-per-minute limit. Confirm the real number
+ * from x-ratelimit-limit-tokens on one of your own 429s.
  */
 export const DEFAULT_MODEL = "gpt-4o";
 export const HARSH_ERROR = "The coaching response could not finish";

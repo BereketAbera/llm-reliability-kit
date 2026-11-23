@@ -105,7 +105,7 @@ If a unit test fails, the build fails, or the 30-question score drops, the build
 
 ## Assumptions to confirm on the real app
 
-- **30,000 tokens per minute** is assumed (Tier 1 for gpt-4o-class models; the default model in the code is `gpt-4o` to match). `x-ratelimit-limit-tokens` on one of the real 429s confirms it, and whether the limit belongs to Replit's integration or an OpenAI account you control.
+- **30,000 tokens per minute** is an assumption: two of the post's 14,500-token prompts fit in it and a third does not, which matches the post's one in three. The default model in the code, `gpt-4o`, is an assumption too. `x-ratelimit-limit-tokens` on one of the real 429s confirms the limit, and whether the limit belongs to Replit's integration or an OpenAI account you control.
 - **The 14,500 prompt tokens are mostly pasted reference text.** A token breakdown of one real prompt confirms it. The demo pads prompts to that size; it does not measure a real prompt.
 - **About 4,000 tokens after trimming** is a target. The trim ships only if the 30-question score holds.
 

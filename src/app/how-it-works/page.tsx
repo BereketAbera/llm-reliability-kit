@@ -63,7 +63,7 @@ export default function HowItWorksPage() {
               the tokens-per-minute limit before anything else.
             </p>
             <TokenBudgetFigure
-              caption={`Each request reserves its prompt plus up to ${DEFAULT_PARAMS.maxOutputTokens} output tokens the moment it arrives.`}
+              caption={`In this simulation, each request reserves its prompt plus up to ${DEFAULT_PARAMS.maxOutputTokens} output tokens the moment it arrives.`}
             />
             <p>What I would check, in order:</p>
             <ol className="list-decimal space-y-3 pl-5">
@@ -73,10 +73,10 @@ export default function HowItWorksPage() {
                 those details, log them before they are lost.
               </li>
               <li>
-                <strong>Compare tokens per minute with prompt size times concurrency.</strong> Each request reserves its prompt plus its max output
-                tokens when it arrives. Three requests of {prompt} + {DEFAULT_PARAMS.maxOutputTokens} tokens need{" "}
+                <strong>Compare tokens per minute with prompt size times concurrency.</strong> In this simulation, each request reserves its prompt plus
+                its max output tokens when it arrives. Three requests of {prompt} + {DEFAULT_PARAMS.maxOutputTokens} tokens need{" "}
                 {thousands(3 * (DEFAULT_PARAMS.promptTokens + DEFAULT_PARAMS.maxOutputTokens))} tokens at once. On a {tpm} tokens-per-minute limit, two
-                fit and the third is rejected: exactly one in three. The {tpm} is an assumption (Tier 1 for gpt-4o-class models);{" "}
+                fit and the third is rejected: exactly one in three. The {tpm} is an assumption;{" "}
                 <code>x-ratelimit-limit-tokens</code> on one of your 429s confirms the real number.
               </li>
               <li>
