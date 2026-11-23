@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="372"
+   width="364"
    height="202"
-   viewBox="0 0 372 202"
+   viewBox="0 0 364 202"
    role="img"
    aria-labelledby="token-budget-title token-budget-desc"
    font-family="Geist, 'Helvetica Neue', Helvetica, Arial, sans-serif"
@@ -35,35 +35,35 @@
     </pattern>
   </defs>
   <path
-     d="M240 14V199"
+     d="M232 14V199"
      stroke="#52565b"
      stroke-width="1.25"
      stroke-dasharray="3 3"
      id="path2" />
   <path
-     d="M8.5 21V16.5H235.5V21"
+     d="M0.5 21V16.5H227.5V21"
      fill="none"
      stroke="#52565b"
      id="path3" />
   <text
-     x="122"
+     x="114"
      y="11"
-     font-size="12"
+     font-size="13"
      fill="#0a0a0a"
      font-weight="500"
      text-anchor="middle"
      id="text3">30,000 tokens a minute</text>
   <text
-     x="301"
+     x="293"
      y="11"
-     font-size="12"
+     font-size="13"
      fill="#52565b"
      text-anchor="middle"
      id="text4">over the limit</text>
   <text
-     x="8"
+     x="0"
      y="42"
-     font-size="13"
+     font-size="14"
      font-weight="600"
      fill="#0a0a0a"
      id="text5">Today<tspan
@@ -71,7 +71,7 @@
    fill="#52565b"
    id="tspan4"> · 15,000 each</tspan></text>
   <rect
-     x="8"
+     x="0"
      y="49"
      width="228"
      height="26"
@@ -79,7 +79,7 @@
      fill="#e5e5e5"
      id="rect5" />
   <rect
-     x="9"
+     x="1"
      y="50"
      width="112"
      height="24"
@@ -87,14 +87,14 @@
      fill="#1c406e"
      id="rect6" />
   <text
-     x="17"
-     y="66.2"
-     font-size="12"
+     x="9"
+     y="66.61"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      id="text6">Rep 1</text>
   <rect
-     x="123"
+     x="115"
      y="50"
      width="112"
      height="24"
@@ -102,14 +102,14 @@
      fill="#1c406e"
      id="rect7" />
   <text
-     x="131"
-     y="66.2"
-     font-size="12"
+     x="123"
+     y="66.61"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      id="text7">Rep 2</text>
   <rect
-     x="245"
+     x="237"
      y="50"
      width="112"
      height="24"
@@ -119,29 +119,29 @@
      stroke-width="1.25"
      id="rect8" />
   <text
-     x="253"
-     y="66.2"
-     font-size="12"
+     x="245"
+     y="66.61"
+     font-size="13"
      fill="#be2323"
      font-weight="600"
      id="text8">Rep 3</text>
   <text
-     x="349"
-     y="66.2"
-     font-size="12"
+     x="341"
+     y="66.61"
+     font-size="13"
      fill="#be2323"
      font-weight="700"
      text-anchor="end"
      id="text9">429</text>
   <text
-     x="8"
+     x="0"
      y="102"
-     font-size="13"
+     font-size="14"
      font-weight="600"
      fill="#0a0a0a"
      id="text10">With the retry queue</text>
   <rect
-     x="8"
+     x="0"
      y="109"
      width="228"
      height="26"
@@ -149,7 +149,7 @@
      fill="#e5e5e5"
      id="rect10" />
   <rect
-     x="9"
+     x="1"
      y="110"
      width="112"
      height="24"
@@ -157,14 +157,14 @@
      fill="#1c406e"
      id="rect11" />
   <text
-     x="17"
-     y="126.2"
-     font-size="12"
+     x="9"
+     y="126.61"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      id="text11">Rep 1</text>
   <rect
-     x="123"
+     x="115"
      y="110"
      width="112"
      height="24"
@@ -172,47 +172,46 @@
      fill="#1c406e"
      id="rect12" />
   <text
-     x="131"
-     y="126.2"
-     font-size="12"
+     x="123"
+     y="126.61"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      id="text12">Rep 2</text>
+  <rect
+     x="237"
+     y="92.8"
+     width="14"
+     height="9.2"
+     rx="2"
+     fill="url(#tb-wait)"
+     id="rect13" />
   <text
-     x="245"
+     x="256"
      y="102"
-     font-size="12"
+     font-size="13"
      fill="#0a0a0a"
      font-weight="500"
      id="text13">waits 30 s</text>
   <rect
-     x="245"
+     x="237"
      y="110"
-     width="72"
-     height="24"
-     rx="3"
-     fill="url(#tb-wait)"
-     id="rect13" />
-  <rect
-     x="316"
-     y="110"
-     width="41"
+     width="112"
      height="24"
      rx="3"
      fill="#1c406e"
      id="rect14" />
   <text
-     x="336.5"
-     y="126.2"
-     font-size="12"
+     x="245"
+     y="126.61"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
-     text-anchor="middle"
      id="text14">Rep 3</text>
   <text
-     x="8"
+     x="0"
      y="162"
-     font-size="13"
+     font-size="14"
      font-weight="600"
      fill="#0a0a0a"
      id="text15">Smaller prompts<tspan
@@ -220,7 +219,7 @@
    fill="#52565b"
    id="tspan14"> · 4,500 each</tspan></text>
   <rect
-     x="8"
+     x="0"
      y="169"
      width="228"
      height="26"
@@ -228,7 +227,7 @@
      fill="#e5e5e5"
      id="rect15" />
   <rect
-     x="9"
+     x="1"
      y="170"
      width="32.2"
      height="24"
@@ -236,15 +235,15 @@
      fill="#1c406e"
      id="rect16" />
   <text
-     x="25.1"
-     y="186.2"
-     font-size="12"
+     x="17.1"
+     y="186.62"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      text-anchor="middle"
      id="text16">1</text>
   <rect
-     x="43.2"
+     x="35.2"
      y="170"
      width="32.2"
      height="24"
@@ -252,15 +251,15 @@
      fill="#1c406e"
      id="rect17" />
   <text
-     x="59.3"
-     y="186.2"
-     font-size="12"
+     x="51.3"
+     y="186.62"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      text-anchor="middle"
      id="text17">2</text>
   <rect
-     x="77.4"
+     x="69.4"
      y="170"
      width="32.2"
      height="24"
@@ -268,15 +267,15 @@
      fill="#1c406e"
      id="rect18" />
   <text
-     x="93.5"
-     y="186.2"
-     font-size="12"
+     x="85.5"
+     y="186.62"
+     font-size="13"
      fill="#ffffff"
      font-weight="600"
      text-anchor="middle"
      id="text18">3</text>
   <rect
-     x="112.1"
+     x="104.1"
      y="170.5"
      width="31.2"
      height="23"
@@ -286,15 +285,15 @@
      stroke-dasharray="2.5 2"
      id="rect19" />
   <text
-     x="127.7"
-     y="186.2"
-     font-size="12"
+     x="119.7"
+     y="186.62"
+     font-size="13"
      fill="#52565b"
      font-weight="500"
      text-anchor="middle"
      id="text19">4</text>
   <rect
-     x="146.3"
+     x="138.3"
      y="170.5"
      width="31.2"
      height="23"
@@ -304,15 +303,15 @@
      stroke-dasharray="2.5 2"
      id="rect20" />
   <text
-     x="161.9"
-     y="186.2"
-     font-size="12"
+     x="153.9"
+     y="186.62"
+     font-size="13"
      fill="#52565b"
      font-weight="500"
      text-anchor="middle"
      id="text20">5</text>
   <rect
-     x="180.5"
+     x="172.5"
      y="170.5"
      width="31.2"
      height="23"
@@ -322,17 +321,17 @@
      stroke-dasharray="2.5 2"
      id="rect21" />
   <text
-     x="196.1"
-     y="186.2"
-     font-size="12"
+     x="188.1"
+     y="186.62"
+     font-size="13"
      fill="#52565b"
      font-weight="500"
      text-anchor="middle"
      id="text21">6</text>
   <text
-     x="245"
-     y="186.2"
-     font-size="12"
+     x="237"
+     y="186.62"
+     font-size="13"
      fill="#52565b"
      id="text22">nobody waits</text>
 </svg>

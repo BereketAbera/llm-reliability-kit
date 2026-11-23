@@ -10,7 +10,7 @@ export function TokenBudgetFigure({ caption }: { caption: string }) {
   const file = readRepoFile("public/diagrams/token-budget.svg");
   const svg = file.slice(file.indexOf("<svg"));
   return (
-    <figure className="max-w-[420px]">
+    <figure className="max-w-[380px]">
       <div className="[&>svg]:block [&>svg]:h-auto [&>svg]:w-full [&>svg]:font-sans" dangerouslySetInnerHTML={{ __html: svg }} />
       <figcaption className="mt-2 text-sm leading-relaxed text-muted-foreground">{caption}</figcaption>
     </figure>

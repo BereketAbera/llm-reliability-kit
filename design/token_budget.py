@@ -2,8 +2,12 @@
 
 Three rows on one scale. Today Rep 1 and Rep 2 each reserve 15,000 tokens and
 fill the 30,000-token minute, so Rep 3 lands over the limit and gets a 429.
-With the retry queue Rep 3 waits about 30 seconds for room, then is answered.
-With 4,000-token prompts three requests use 13,500 of 30,000: room for six.
+With the retry queue Rep 3 waits about 30 seconds for room, then is answered:
+the same 15,000-token block, so width means tokens in every row and the wait
+is said in its label. With 4,000-token prompts three requests use 13,500 of
+30,000: room for six.
+
+The viewBox starts at the track, so the figure lines up with the text around it.
 
 Writes design/out/token-budget.svg. Text stays text: on the page the SVG is
 inlined, so the labels use the page's own font. og.py reuses the pieces below.
@@ -38,12 +42,14 @@ PER_TRIMMED = TRIMMED_TOKENS + OUTPUT_TOKENS  # 4,500
 WAIT_SECONDS = round(PER_REQUEST / (TPM / 60))  # 15,000 tokens of budget come back in 30 s
 FIT_TRIMMED = TPM // PER_TRIMMED  # 6
 
-WIDTH = 372
-TRACK_X = 8
+TRACK_X = 0  # the track starts at the left edge, in line with the page's text
 TRACK_W = 228  # one minute: 30,000 tokens
 UNIT = TRACK_W / TPM
 LIMIT_X = TRACK_X + TRACK_W + 4
 OVER_X = TRACK_X + TRACK_W + 8  # where tokens past the limit start
+WIDTH = OVER_X + 128  # room for one 15,000-token block past the limit, and its label
+LABEL_SIZE = 13  # 11.7 px on a 360 px phone
+TITLE_SIZE = 14
 BAR_H = 26
 ROW_STEP = 60
 FIRST_ROW = 30
@@ -63,7 +69,7 @@ def fmt(value: float) -> str:
     return f"{value:.2f}".rstrip("0").rstrip(".")
 
 
-def text(x: float, y: float, content: str, size: float = 12, fill: str = FOREGROUND, weight: int = 400, anchor: str = "start", extra: str = "") -> str:
+def text(x: float, y: float, content: str, size: float = LABEL_SIZE, fill: str = FOREGROUND, weight: int = 400, anchor: str = "start", extra: str = "") -> str:
     anchor_attr = "" if anchor == "start" else f' text-anchor="{anchor}"'
     weight_attr = "" if weight == 400 else f' font-weight="{weight}"'
     return f'<text x="{fmt(x)}" y="{fmt(y)}" font-size="{fmt(size)}" fill="{fill}"{weight_attr}{anchor_attr}{extra}>{content}</text>'
@@ -101,7 +107,8 @@ def track(y: float) -> str:
 
 
 def label_y(bar_y: float) -> float:
-    return bar_y + BAR_H / 2 + 4.2
+    """Baseline that centres a label's capitals in the bar."""
+    return bar_y + BAR_H / 2 + 0.355 * LABEL_SIZE
 
 
 def two_answered(bar_y: float) -> list[str]:
@@ -124,15 +131,17 @@ def today_row(bar_y: float) -> list[str]:
 
 
 def queue_row(bar_y: float) -> list[str]:
-    """Rep 3 waits in line until budget comes back, then is answered. The note sits above the block."""
-    wait_w = 72
-    over_end = OVER_X + PER_REQUEST * UNIT
+    """Rep 3 waits in line until budget comes back, then is answered: the same 15,000-token block
+    as in the Today row, in navy. The wait is said above it, after a chip in the /burst
+    "Waiting in line" stripes."""
+    note_y = bar_y - 7
+    chip_h = round(0.71 * LABEL_SIZE, 1)  # the label's cap height
     return [
         *two_answered(bar_y),
-        text(OVER_X + 1, bar_y - 7, f"waits {WAIT_SECONDS} s", size=12, fill=FOREGROUND, weight=500),
-        f'<rect x="{fmt(OVER_X + 1)}" y="{fmt(bar_y + 1)}" width="{wait_w}" height="{BAR_H - 2}" rx="3" fill="url(#tb-wait)"/>',
-        f'<rect x="{fmt(OVER_X + wait_w)}" y="{fmt(bar_y + 1)}" width="{fmt(over_end - 1 - OVER_X - wait_w)}" height="{BAR_H - 2}" rx="3" fill="{PRIMARY}"/>',
-        text((OVER_X + wait_w + over_end - 1) / 2, label_y(bar_y), "Rep 3", fill=WHITE, weight=600, anchor="middle"),
+        f'<rect x="{fmt(OVER_X + 1)}" y="{fmt(note_y - chip_h)}" width="14" height="{fmt(chip_h)}" rx="2" fill="url(#tb-wait)"/>',
+        text(OVER_X + 20, note_y, f"waits {WAIT_SECONDS} s", fill=FOREGROUND, weight=500),
+        block(0, PER_REQUEST, bar_y, PRIMARY, origin=OVER_X),
+        text(OVER_X + 9, label_y(bar_y), "Rep 3", fill=WHITE, weight=600),
     ]
 
 
@@ -157,7 +166,7 @@ def trimmed_row(bar_y: float) -> list[str]:
 
 def row_title(y: float, lead: str, rest: str = "") -> str:
     tail = f'<tspan font-weight="400" fill="{MUTED_FOREGROUND}"> · {rest}</tspan>' if rest else ""
-    return f'<text x="{TRACK_X}" y="{fmt(y)}" font-size="13" font-weight="600" fill="{FOREGROUND}">{lead}{tail}</text>'
+    return f'<text x="{TRACK_X}" y="{fmt(y)}" font-size="{TITLE_SIZE}" font-weight="600" fill="{FOREGROUND}">{lead}{tail}</text>'
 
 
 def diagram() -> str:
