@@ -18,6 +18,7 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "src/lib/coach/english-words.data.ts",
     ],
   },
 ];

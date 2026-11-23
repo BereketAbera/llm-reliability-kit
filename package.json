@@ -12,7 +12,8 @@
     "test:e2e": "playwright test",
     "eval": "tsx scripts/eval.ts",
     "screenshots": "tsx scripts/screenshots.ts",
-    "smoke:openai": "tsx scripts/openai-smoke.ts"
+    "smoke:openai": "tsx scripts/openai-smoke.ts",
+    "words": "tsx scripts/build-english-words.ts"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
