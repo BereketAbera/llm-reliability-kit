@@ -44,3 +44,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /blob-report/
+
+# design scripts: intermediate drawings (design/build.sh rebuilds them)
+/design/out/
