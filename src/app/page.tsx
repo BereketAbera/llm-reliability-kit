@@ -104,7 +104,7 @@ export default async function HomePage() {
           <ol className="grid gap-3 sm:grid-cols-2">
             {[
               ["Read one failed request", "The 429 headers in your logs say which limit was hit, how much is left and whose key it is: Replit's AI integration or an OpenAI account you control."],
-              ["Wrap your OpenAI call", "Put the retry-queue client around the call you have today: token-aware waiting, backoff that honors retry-after, and a calm message instead of an error."],
+              ["Wrap your OpenAI call", "Put the retry-queue client around the call you have today: token-aware waiting, backoff that honors retry-after, and “Lots of reps are asking right now” instead of an error."],
               ["Load your 30 questions", "Your questions and the exact lines a good answer must use go into the test format. Today's score becomes the baseline."],
               ["Gate the Replit publish", "The deployment build runs the test. If the score drops, or more questions get a wrong line, the build fails and nothing is published."],
             ].map(([title, body], index) => (
@@ -179,7 +179,7 @@ export default async function HomePage() {
         <SectionTitle id="real-title">What is real here</SectionTitle>
         <div className="mt-4 grid gap-6 text-sm leading-relaxed md:grid-cols-3">
           <div>
-            <CardTitle as="h3">Running code, not mockups</CardTitle>
+            <CardTitle as="h3">Running code behind the numbers</CardTitle>
             <p className="mt-1 text-muted-foreground">
               The clients, token bucket, backoff, matcher, retrieval and scorer are the TypeScript behind the numbers on the 429, Ask and 30-question
               pages, with unit, integration and end-to-end tests. Monitoring runs a simulated day of traffic through the same clients.

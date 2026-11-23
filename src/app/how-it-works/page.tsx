@@ -31,7 +31,7 @@ function Code({ file, name, what }: { file: string; name: string; what: string }
 
 const TOC = [
   ["check-first", "What to check first for the 429s"],
-  ["the-fix", "The fix: queue, retry, fail calmly"],
+  ["the-fix", "The fix: wait for budget, retry on the provider's schedule"],
   ["setup", "Provider setup for a group of reps"],
   ["exact-lines", "How the coach keeps the exact lines"],
   ["library", "The document library in Postgres"],
@@ -103,7 +103,7 @@ export default function HowItWorksPage() {
             </p>
           </Section>
 
-          <Section id="the-fix" title="The fix: queue, retry, fail calmly">
+          <Section id="the-fix" title="The fix: wait for budget, retry on the provider's schedule">
             <p>
               <strong>Token-aware admission.</strong> Before sending, the client estimates the request&apos;s tokens and waits in a local token
               bucket that mirrors the provider&apos;s limit. A request the provider would reject is never sent; it waits its turn instead.
@@ -121,13 +121,13 @@ export default function HowItWorksPage() {
             </p>
             <Code file="src/lib/reliability/clients.ts" name="resilient-send" what="single-file admission" />
             <p>
-              <strong>Fail fast and calmly.</strong> If the queue ahead already needs more budget than a rep can reasonably wait for (45 seconds), the
+              <strong>Fail fast, with a clear message.</strong> If the queue ahead already needs more budget than a rep can reasonably wait for (45 seconds), the
               client says so at once. Every failure leaves the server as a clean <code>event: error</code> with a code and a retry hint, which the app
               turns into &ldquo;Lots of reps are asking right now. Tap Try again in about 20 seconds&rdquo; instead of &ldquo;The coaching response
               could not finish&rdquo;. The message promises only what happens: nothing is saved or retried behind the rep&apos;s back.
             </p>
             <Code file="src/lib/reliability/clients.ts" name="shed" what="failing fast" />
-            <Code file="src/lib/reliability/clients.ts" name="clean-error" what="the calm error" />
+            <Code file="src/lib/reliability/clients.ts" name="clean-error" what="the try-again message" />
           </Section>
 
           <Section id="setup" title="Provider setup for a group of reps">

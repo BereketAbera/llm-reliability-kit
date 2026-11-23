@@ -42,7 +42,7 @@ pnpm eval           # the 30-question test; exits 1 if the gate blocks
 ```
 
 - **Unit:** backoff and full jitter, retry-after parsing, the token bucket and concurrency cap, stemming, typo correction against a real-word list, the matcher's thresholds, retrieval's evidence rules (generic words, channel, buyer's side, margin), scorer outcomes, SSE parsing (an event cut off mid-stream is dropped), library integrity, eval CLI options, browser-storage validation.
-- **Integration:** with seed 7, today's client fails one request in three with a 429 and the retry queue fails none; runs are deterministic; the shared-key preset honors every retry-after and only ever fails calmly; the simulated day is produced by the real clients; the eval score is computed correctly and the gate blocks both a paraphrasing change and a change that adds wrong lines; the HTTP routes validate input and stream a clean `event: error`.
+- **Integration:** with seed 7, today's client fails one request in three with a 429 and the retry queue fails none; runs are deterministic; the shared-key preset honors every retry-after, and any rep it cannot answer is told when to try again instead of seeing an error; the simulated day is produced by the real clients; the eval score is computed correctly and the gate blocks both a paraphrasing change and a change that adds wrong lines; the HTTP routes validate input and stream a clean `event: error`.
 - **End to end:** every page, the live burst (including Stop and a dropped connection), the ask flows (including a cut-off stream and a busy server), the gate, monitoring, the JSON and SSE endpoints, security headers, and no horizontal scroll on a 390 px phone after asking questions.
 
 ### The three question sets

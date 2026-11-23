@@ -33,7 +33,7 @@ export default function EvalPage() {
   const minutes = (tokens: number) => Math.round((tokens / DEFAULT_PARAMS.tpm) * 10) / 10;
   return (
     <>
-      <PageHeader eyebrow="Publish gate · measured, not guessed" title="The 30-question test">
+      <PageHeader eyebrow={`Publish gate · blocks below ${EVAL_THRESHOLD}/${EVAL_SUITE.length}`} title="The 30-question test">
         <p>
           Thirty fictional questions, written the way reps ask, each tied to the approved line a good answer must contain. An answer counts as on
           method only if it contains that line word for word (ignoring case, spacing and punctuation) or quotes the right source line exactly. Naming

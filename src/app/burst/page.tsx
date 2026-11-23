@@ -28,7 +28,7 @@ export default async function BurstPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Burst lab · reliability under load" title="Fixing the 429s">
+      <PageHeader eyebrow="Burst lab · your question 2" title="Fixing the 429s">
         <p>
           Three reps ask at once with prompts of about {thousands(DEFAULT_PARAMS.promptTokens)} tokens, against an assumed limit of{" "}
           {thousands(DEFAULT_PARAMS.tpm)} tokens per minute. The same burst runs through three clients: where the 429s come from, and what removes them.

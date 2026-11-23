@@ -30,7 +30,7 @@ export interface Bucket {
   requests: number;
   failed: number;
   busy: number;
-  /** Questions the rep never got an answer to: hard failures plus calm "try again" messages. */
+  /** Questions the rep never got an answer to: hard failures plus "try again" messages. */
   unanswered: number;
   errorRate: number;
   p95Ms: number;
@@ -184,7 +184,7 @@ const unanswered = (run: RunRecord) => run.outcome === "failed" || run.outcome =
 // excerpt:start error-rate
 /**
  * A question is unanswered if the rep never got an answer: a hard failure, or a
- * calm "try again". Both count toward the error rate and the alerts.
+ * "try again" message. Both count toward the error rate and the alerts.
  */
 export function bucketize(runs: RunRecord[], bucketMinutes = BUCKET_MINUTES, dayMinutes = DAY_MINUTES): Bucket[] {
   const buckets: Bucket[] = [];

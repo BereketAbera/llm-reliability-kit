@@ -87,7 +87,7 @@ export const VARIANTS: Record<VariantKey, { title: string; summary: string }> = 
   resilient: {
     title: "With retry queue",
     summary:
-      "Estimates tokens first and waits in a local token bucket, caps concurrency at 4, retries with full-jitter backoff that honors retry-after (4 retries max), and tells the rep calmly to try again when the wait would pass 45 seconds.",
+      "Estimates tokens first and waits in a local token bucket, caps concurrency at 4, retries with full-jitter backoff that honors retry-after (4 retries max), and tells the rep to try again when the wait would pass 45 seconds.",
   },
   trimmed: {
     title: "+ smaller prompts",

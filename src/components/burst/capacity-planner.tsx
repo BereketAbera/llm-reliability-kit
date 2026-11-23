@@ -78,7 +78,7 @@ export function CapacityPlanner({ promptTokens, trimmedTokens, maxOutputTokens }
           <strong>One queue per key.</strong> With more than one server instance, keep the token bucket in shared storage (your existing Postgres works) so each instance does not assume it has the whole budget.
         </li>
         <li>
-          <strong>Retry on the provider&apos;s schedule.</strong> Honor retry-after, add jitter, cap retries, and tell the rep calmly when the wait would be too long.
+          <strong>Retry on the provider&apos;s schedule.</strong> Honor retry-after, add jitter, cap retries, and tell the rep to try again when the wait would be too long.
         </li>
         <li>
           <strong>Alert on 429s, not only failures.</strong> 429s that retries absorb are the early warning that the tier is too small.
