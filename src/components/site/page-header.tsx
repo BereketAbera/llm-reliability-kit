@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export function PageHeader({ eyebrow, title, children, actions }: { eyebrow?: string; title: string; children?: ReactNode; actions?: ReactNode }) {
   return (
@@ -24,10 +25,20 @@ export function Stat({ label, value, hint, tone = "default" }: { label: string; 
   );
 }
 
-export function SectionTitle({ children, id }: { children: ReactNode; id?: string }) {
+/** A section on the page canvas. */
+export function SectionTitle({ children, id, className }: { children: ReactNode; id?: string; className?: string }) {
   return (
-    <h2 id={id} className="text-xl font-semibold tracking-tight">
+    <h2 id={id} className={cn("text-xl font-semibold tracking-tight text-balance", className)}>
       {children}
     </h2>
+  );
+}
+
+/** The title inside a bordered card. */
+export function CardTitle({ children, id, as: Tag = "h2", className }: { children: ReactNode; id?: string; as?: "h2" | "h3"; className?: string }) {
+  return (
+    <Tag id={id} className={cn("text-base font-semibold text-balance", className)}>
+      {children}
+    </Tag>
   );
 }
