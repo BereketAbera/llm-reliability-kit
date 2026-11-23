@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { TokenBudgetFigure } from "@/components/how-it-works/token-budget-figure";
 import { CodeBlock } from "@/components/site/code-block";
 import { OnThisPage } from "@/components/site/on-this-page";
 import { PageHeader } from "@/components/site/page-header";
@@ -59,8 +60,12 @@ export default function HowItWorksPage() {
           <Section id="check-first" title="What to check first for the 429s">
             <p>
               The post says about one request in three fails when three arrive together, with prompts of about {prompt} tokens. That pattern points at
-              the tokens-per-minute limit before anything else. In order:
+              the tokens-per-minute limit before anything else.
             </p>
+            <TokenBudgetFigure
+              caption={`Each request reserves its prompt plus up to ${DEFAULT_PARAMS.maxOutputTokens} output tokens the moment it arrives.`}
+            />
+            <p>What I would check, in order:</p>
             <ol className="list-decimal space-y-3 pl-5">
               <li>
                 <strong>Read one failed response in full.</strong> The 429 body and the <code>x-ratelimit-*</code> headers say whether the limit hit was
