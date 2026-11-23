@@ -33,7 +33,10 @@ function describe(t: RequestTimeline): string {
   return parts.join(", ");
 }
 
-export function TimelineChart({ timelines, maxMs, now }: { timelines: RequestTimeline[]; maxMs: number; now?: number }) {
+/** Bars and ticks share one grid column, so a tick sits exactly where its time falls on the bars. */
+const ROW = "grid grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-x-2 sm:grid-cols-[3.75rem_minmax(0,1fr)_7rem]";
+
+export function TimelineChart({ timelines, maxMs, now, unfinished }: { timelines: RequestTimeline[]; maxMs: number; now?: number; unfinished?: string }) {
   const scale = Math.max(maxMs, 2_000);
   const step = niceStep(scale);
   const ticks: number[] = [];
@@ -46,7 +49,7 @@ export function TimelineChart({ timelines, maxMs, now }: { timelines: RequestTim
         {timelines.map((t) => {
           const openTo = t.outcome === "pending" && now !== undefined ? now : undefined;
           return (
-            <li key={t.id} className="grid grid-cols-[3.25rem_1fr] items-center gap-2 sm:grid-cols-[3.75rem_1fr_6.5rem]">
+            <li key={t.id} className={cn(ROW, "gap-y-0.5")}>
               <span className="text-xs font-medium text-muted-foreground">Rep {t.id}</span>
               <div className="relative h-6 rounded bg-muted" role="img" aria-label={describe(t)}>
                 {t.segments.map((segment, index) => (
@@ -62,14 +65,6 @@ export function TimelineChart({ timelines, maxMs, now }: { timelines: RequestTim
                     style={{ left: pct(t.phaseSince), width: `max(2px, ${pct(openTo - t.phaseSince)})` }}
                   />
                 ) : null}
-                {t.rateLimits.map((at, index) => (
-                  <span
-                    key={`r${index}`}
-                    title="429 rate limited"
-                    className="absolute top-1/2 size-2.5 -translate-y-1/2 rotate-45 bg-bad ring-2 ring-background"
-                    style={{ left: `clamp(0px, calc(${pct(at)} - 5px), calc(100% - 10px))` }}
-                  />
-                ))}
                 {t.outcome !== "pending" && t.endedAt !== undefined ? (
                   <span
                     className={cn(
@@ -81,25 +76,42 @@ export function TimelineChart({ timelines, maxMs, now }: { timelines: RequestTim
                     {t.outcome === "done" ? <Check className="size-3" aria-hidden /> : <X className="size-3" aria-hidden />}
                   </span>
                 ) : null}
+                {t.rateLimits.map((at, index) => (
+                  <span
+                    key={`r${index}`}
+                    title="429 from the provider"
+                    className="absolute top-0 z-10 size-2.5 -translate-y-1/2 rotate-45 bg-bad ring-2 ring-background"
+                    style={{ left: `clamp(0px, calc(${pct(at)} - 5px), calc(100% - 10px))` }}
+                  />
+                ))}
               </div>
               <span
                 className={cn(
-                  "col-start-2 text-xs tabular sm:col-start-auto sm:text-right",
-                  t.outcome === "done" ? "text-foreground" : t.outcome === "error" ? (t.error?.code === "busy" ? "text-warn" : "text-bad") : "text-muted-foreground",
+                  "col-start-2 text-xs whitespace-nowrap tabular sm:col-start-auto sm:text-right",
+                  t.outcome === "done" ? "text-foreground" : t.outcome === "error" ? (t.error?.code === "busy" ? "text-warn" : "text-bad") : unfinished ? "text-warn" : "text-muted-foreground",
                 )}
               >
-                {t.outcome === "done" ? `Answered ${seconds(t.latencyMs)}` : t.outcome === "error" ? (t.error?.code === "busy" ? "Busy, retry" : "Failed (429)") : "Running…"}
+                {t.outcome === "done"
+                  ? `Answered ${seconds(t.latencyMs)}`
+                  : t.outcome === "error"
+                    ? t.error?.code === "busy"
+                      ? "Told to try again"
+                      : "Failed (429)"
+                    : (unfinished ?? "Running…")}
               </span>
             </li>
           );
         })}
       </ul>
-      <div className="relative mt-1 ml-[3.75rem] h-5 sm:mr-[6.5rem] sm:ml-[4.25rem]" aria-hidden>
-        {ticks.map((tick) => (
-          <span key={tick} className="absolute -translate-x-1/2 text-[11px] text-muted-foreground tabular" style={{ left: pct(tick) }}>
-            {tick === 0 ? "0" : `${tick / 1000}s`}
-          </span>
-        ))}
+      <div className={cn(ROW, "mt-1")} aria-hidden>
+        <span />
+        <div className="relative h-5">
+          {ticks.map((tick) => (
+            <span key={tick} className="absolute -translate-x-1/2 text-[11px] whitespace-nowrap text-muted-foreground tabular" style={{ left: pct(tick) }}>
+              {tick === 0 ? "0" : `${tick / 1000} s`}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
