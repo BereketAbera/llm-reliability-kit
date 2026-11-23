@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Rebuilds every design asset from the Python scripts in this folder.
-# Needs Python 3 (standard library only) and the Inkscape 1.4 command line.
+# Needs Python 3 (standard library only), the Inkscape 1.4 command line and, for the
+# social card's Geist, the repo's Playwright Chromium and a `pnpm build`.
 # Run from anywhere: design/build.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -26,8 +27,12 @@ python3 -B design/ico.py "$OUT/favicon-16.png" "$OUT/favicon-32.png" "$OUT/favic
 #    this file, so the labels are drawn in the page's own font.
 "$INKSCAPE" "$OUT/token-budget.svg" --export-type=svg --export-plain-svg -o public/diagrams/token-budget.svg
 
-# 4. The social preview card. Inkscape sets the text in Geist when it is installed,
-#    otherwise in the next font of the stack in design/palette.py.
-"$INKSCAPE" "$OUT/og.svg" --export-type=png --export-width=1200 --export-height=630 --export-background-opacity=1 -o src/app/opengraph-image.png
+# 4. The social preview card, in Chromium with the site's Geist from the last `pnpm build`
+#    (.next/static/media). Without a build, Inkscape renders it in the next font of the
+#    stack in design/palette.py instead.
+if ! node design/og-render.mjs; then
+  echo "build.sh: rendering the social card with Inkscape instead" >&2
+  "$INKSCAPE" "$OUT/og.svg" --export-type=png --export-width=1200 --export-height=630 --export-background-opacity=1 -o src/app/opengraph-image.png
+fi
 
 ls -l src/app/icon.svg src/app/apple-icon.png src/app/favicon.ico public/diagrams/token-budget.svg src/app/opengraph-image.png
