@@ -1,7 +1,7 @@
 """The kit's mark: three reps from the "With retry queue" timeline on /burst.
 
-Rows 1 and 2 are answered at once (navy). Row 3 waits its turn in line (grey),
-then is answered (navy) instead of getting a 429. Drawn on a 32-unit grid with
+Rows 1 and 2 are answered at once (navy, the same length). Row 3 waits its
+turn in line (grey), then is answered (navy) instead of getting a 429. Drawn on a 32-unit grid with
 every edge on an even unit, so it lands on whole pixels both as a 32 px icon
 and as a 16 px favicon.
 
@@ -21,7 +21,7 @@ RADIUS = 1.5
 # (kind, x, y, width, height). The waiting bar runs under the last navy block,
 # so the join between them has no gap.
 ROWS = [
-    ("answered", 4, 4, 12, 6),
+    ("answered", 4, 4, 14, 6),
     ("answered", 4, 12, 14, 6),
     ("waiting", 4, 20, 20, 6),
     ("answered", 20, 20, 8, 6),
