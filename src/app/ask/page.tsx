@@ -14,7 +14,7 @@ export default function AskPage() {
   const issues = validateLibrary();
   return (
     <>
-      <PageHeader eyebrow="Exact lines · answer bank first" title="Ask the coach">
+      <PageHeader eyebrow="Exact lines · your question 3" title="Ask the coach">
         <p>
           Common rep questions are answered from a bank of {ANSWER_BANK.length} approved answers, word for word, followed by one offer:
           &ldquo;Want to know why this works?&rdquo; Everything else falls back to search over the training documents and returns the exact source

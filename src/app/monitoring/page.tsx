@@ -38,7 +38,7 @@ export default async function MonitoringPage() {
   const log = [...slice(snapshot.runs, worstBefore), ...slice(snapshot.runs, worstAfter)];
   return (
     <>
-      <PageHeader eyebrow="Illustrative day: simulated traffic through the real clients" title="Monitoring">
+      <PageHeader eyebrow="Simulated day · task 5" title="Monitoring">
         <p>
           In production every answer is logged with its path, outcome, wait and attempts. This page builds that log from a seeded day of simulated
           questions sent through the same clients as the 429 page: today&apos;s client until {clockLabel(DEPLOY_MINUTE)}, the retry queue after it.

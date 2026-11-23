@@ -179,7 +179,7 @@ export default async function HomePage() {
         <SectionTitle id="real-title">What is real here</SectionTitle>
         <div className="mt-4 grid gap-6 text-sm leading-relaxed md:grid-cols-3">
           <div>
-            <CardTitle as="h3">Running code behind the numbers</CardTitle>
+            <CardTitle as="h3">Running code</CardTitle>
             <p className="mt-1 text-muted-foreground">
               The clients, token bucket, backoff, matcher, retrieval and scorer are the TypeScript behind the numbers on the 429, Ask and 30-question
               pages, with unit, integration and end-to-end tests. Monitoring runs a simulated day of traffic through the same clients.
