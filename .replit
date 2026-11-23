@@ -1,0 +1,8 @@
+# The publish gate, as it would sit in the coach's own .replit.
+# Replit runs [deployment] build before every publish. If any step fails
+# (a unit test, the build, or the 30-question test), nothing is published.
+run = "pnpm dev"
+
+[deployment]
+build = "pnpm install --frozen-lockfile && pnpm test && pnpm build && pnpm eval --threshold 24 --baseline eval/baseline.json"
+run = "pnpm start"

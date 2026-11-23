@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   gate:
-    name: Checks and 30-question eval
+    name: Checks and the 30-question test
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -27,22 +27,27 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
-      - name: Eval against the built app
+      - name: The 30-question test against the built app
         run: |
           pnpm start &
-          for i in $(seq 1 30); do curl -fs http://localhost:3203/api/ask?q=ping >/dev/null && break; sleep 1; done
+          for i in $(seq 1 30); do curl -fs "http://localhost:3203/api/ask?q=ping" >/dev/null && break; sleep 1; done
           pnpm eval --url http://localhost:3203 --threshold 24 --baseline eval/baseline.json
 
   publish:
-    name: Publish
+    name: Publish (run by hand)
     needs: gate
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only when started by hand on main, so a push never tries to deploy.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
+      - name: No deploy token set
+        if: env.VERCEL_TOKEN == ''
+        run: echo "VERCEL_TOKEN is not set, so there is nothing to deploy to. The gate above still ran."
       - name: Deploy only after the gate passed
+        if: env.VERCEL_TOKEN != ''
         run: npx vercel@53 deploy --prod --yes --token "$VERCEL_TOKEN"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
