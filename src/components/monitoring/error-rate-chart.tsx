@@ -1,9 +1,11 @@
 import { BUCKET_MINUTES, DAY_MINUTES, DEPLOY_MINUTE, ERROR_RATE_THRESHOLD, clockLabel, type Bucket } from "@/lib/monitoring/monitor";
 
 /**
- * Bars: questions per 15 minutes (right axis). Stacked on the left axis, as a share of
- * questions asked: 429 errors (red) at the bottom, reps told to try again (amber) on top,
- * so the top edge is the unanswered rate the 5% alert watches. Dashed: that threshold.
+ * Bars: questions per 15 minutes (right axis). On the left axis, as a share of questions
+ * asked: 429 errors (red, solid) at the bottom, reps told to try again (lighter amber,
+ * dashed, hollow dots) on top, so the top edge is the unanswered rate the 5% alert watches.
+ * The two causes differ in lightness and line style as well as hue, and each is labelled
+ * on the chart. Dashed grey: that threshold.
  */
 export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
   const width = 640;
@@ -27,7 +29,7 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
   const unanswered = buckets.map((b) => b.errorRate);
   const band = (upper: number[], lower: number[]) =>
     `M${buckets.map((b, i) => point(b, upper[i])).join("L")}L${buckets.map((b, i) => point(b, lower[i])).reverse().join("L")}Z`;
-  // An edge is drawn only where its cause is present, so the red stops where the 429s stop.
+  // An edge is drawn only where its cause is present.
   const edge = (values: number[], present: (b: Bucket) => boolean) => {
     let d = "";
     let open = false;
@@ -52,6 +54,18 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
   const pct = (rate: number) => `${Math.round(rate * 100)}%`;
   const label = "fill-muted-foreground text-[20px] sm:text-[11px]";
 
+  // Lines join bucket centres, so the last 429 window (12:15) would slope on past the 12:30 line
+  // into a window with none. A cause that appears on one side of the deploy only is cut at it.
+  const deployX = x(DEPLOY_MINUTE);
+  const errorClip = total(after, "failed") === 0 ? "url(#rate-before-fix)" : undefined;
+  const busyClip = total(before, "busy") === 0 ? "url(#rate-after-fix)" : undefined;
+
+  // Each series is named beside its highest point, so the legend is not needed to tell them apart.
+  const peak = (rate: (b: Bucket) => number) => buckets.reduce((a, b) => (rate(b) > rate(a) ? b : a), buckets[0]);
+  const errorPeak = peak((b) => (b.requests ? b.failed / b.requests : 0));
+  const busyPeak = peak((b) => (b.requests ? b.busy / b.requests : 0));
+  const seriesLabel = "text-halo text-[20px] font-medium sm:text-[11px]";
+
   return (
     <figure>
       <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-labelledby="chart-title chart-desc">
@@ -61,6 +75,14 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
           try again; the unanswered share peaked at {pct(worstBefore.errorRate)} at {clockLabel(worstBefore.start)}. After it, {total(after, "failed")} got a
           429 error and {total(after, "busy")} were told to try again; the peak was {pct(worstAfter.errorRate)} at {clockLabel(worstAfter.start)}.
         </desc>
+        <defs>
+          <clipPath id="rate-before-fix">
+            <rect x={0} y={0} width={deployX} height={height} />
+          </clipPath>
+          <clipPath id="rate-after-fix">
+            <rect x={deployX} y={0} width={width - deployX} height={height} />
+          </clipPath>
+        </defs>
         {/* Axis titles fit at desktop size; on phones the legend below names the axes. */}
         <text x={4} y={14} className="hidden fill-muted-foreground sm:inline sm:text-[11px]">
           unanswered
@@ -85,18 +107,28 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
           <rect key={b.start} x={x(b.start) + 1} y={yReq(b.requests)} width={barW} height={pad.top + innerH - yReq(b.requests)} className="fill-control-track opacity-60" rx={1.5} />
         ))}
         <line x1={pad.left} x2={width - pad.right} y1={yRate(ERROR_RATE_THRESHOLD)} y2={yRate(ERROR_RATE_THRESHOLD)} className="stroke-muted-foreground" strokeDasharray="5 4" strokeWidth={1.25} />
-        <line x1={x(DEPLOY_MINUTE)} x2={x(DEPLOY_MINUTE)} y1={pad.top - 6} y2={pad.top + innerH} className="stroke-primary" strokeWidth={1.5} />
-        <path d={band(errors, unanswered.map(() => 0))} className="fill-bad opacity-20" />
-        <path d={band(unanswered, errors)} className="fill-warn opacity-25" />
-        <path d={edge(unanswered, (b) => b.busy > 0)} fill="none" className="stroke-warn" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-        <path d={edge(errors, (b) => b.failed > 0)} fill="none" className="stroke-bad" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <path d={band(errors, unanswered.map(() => 0))} clipPath={errorClip} className="fill-bad opacity-20" />
+        <path d={band(unanswered, errors)} clipPath={busyClip} className="fill-warn-wash opacity-45" />
+        <path d={edge(unanswered, (b) => b.busy > 0)} clipPath={busyClip} fill="none" className="stroke-warn-line" strokeWidth={2} strokeDasharray="5 3" strokeLinejoin="round" />
+        <path d={edge(errors, (b) => b.failed > 0)} clipPath={errorClip} fill="none" className="stroke-bad" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <line x1={deployX} x2={deployX} y1={pad.top - 6} y2={pad.top + innerH} className="stroke-primary" strokeWidth={1.5} />
         {buckets.map((b, i) => (
           <g key={`p${b.start}`}>
             {b.failed > 0 ? <circle cx={cx(b)} cy={yRate(errors[i])} r={2.25} className="fill-bad" /> : null}
-            {b.busy > 0 ? <circle cx={cx(b)} cy={yRate(unanswered[i])} r={2.25} className="fill-warn" /> : null}
+            {b.busy > 0 ? <circle cx={cx(b)} cy={yRate(unanswered[i])} r={2.5} className="fill-background stroke-warn-line" strokeWidth={1.5} /> : null}
           </g>
         ))}
-        <text x={x(DEPLOY_MINUTE) + 6} y={pad.top - 10} className="text-halo fill-primary text-[20px] font-medium sm:text-[11px]">
+        {errorPeak.failed > 0 ? (
+          <text x={cx(errorPeak) + 7} y={yRate(errorPeak.failed / errorPeak.requests) - 3} className={`${seriesLabel} fill-bad`}>
+            429 errors
+          </text>
+        ) : null}
+        {busyPeak.busy > 0 ? (
+          <text x={cx(busyPeak) + 7} y={yRate(busyPeak.errorRate) - 3} className={`${seriesLabel} fill-warn`}>
+            told to try again
+          </text>
+        ) : null}
+        <text x={deployX + 6} y={pad.top - 10} className="text-halo fill-primary text-[20px] font-medium sm:text-[11px]">
           {clockLabel(DEPLOY_MINUTE)} retry queue shipped
         </text>
         <text x={pad.left + 4} y={yRate(ERROR_RATE_THRESHOLD) - 6} className="text-halo fill-muted-foreground text-[20px] font-medium sm:text-[11px]">
@@ -108,18 +140,32 @@ export function ErrorRateChart({ buckets }: { buckets: Bucket[] }) {
           </text>
         ))}
       </svg>
-      <figcaption className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-[2px] border-t-2 border-bad bg-bad/20" aria-hidden /> 429 errors
+      <figcaption className="mt-2 space-y-1 text-xs text-muted-foreground">
+        <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span className="w-full sm:w-auto">Share of questions asked (left axis):</span>
+          <span className="flex items-center gap-1.5">
+            <LegendKey cause="errors" /> 429 errors
+          </span>
+          <span className="flex items-center gap-1.5">
+            <LegendKey cause="busy" /> Told to try again
+          </span>
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-[2px] border-t-2 border-warn bg-warn/25" aria-hidden /> Told to try again
-        </span>
-        <span>Stacked, as a share of questions asked (left axis)</span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block size-3 rounded-[2px] bg-control-track" aria-hidden /> Questions per 15 minutes (right axis)
         </span>
       </figcaption>
     </figure>
+  );
+}
+
+/** The series' own marks in miniature: wash, edge and dot, solid red or dashed amber. */
+function LegendKey({ cause }: { cause: "errors" | "busy" }) {
+  const errors = cause === "errors";
+  return (
+    <svg viewBox="0 0 18 12" className="h-3 w-[18px] shrink-0" aria-hidden="true">
+      <rect x={0} y={4} width={18} height={8} rx={1} className={errors ? "fill-bad opacity-20" : "fill-warn-wash opacity-45"} />
+      <path d="M1 4H17" className={errors ? "stroke-bad" : "stroke-warn-line"} strokeWidth={2} strokeDasharray={errors ? undefined : "5 3"} />
+      {errors ? <circle cx={9} cy={4} r={2.25} className="fill-bad" /> : <circle cx={9} cy={4} r={2.5} className="fill-background stroke-warn-line" strokeWidth={1.5} />}
+    </svg>
   );
 }

@@ -13,6 +13,8 @@
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
+  --color-warn-line: var(--warn-line);
+  --color-warn-wash: var(--warn-wash);
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
   --color-info: var(--info);
@@ -69,6 +71,10 @@
   --ok-soft: oklch(0.96 0.04 155);
   --warn: oklch(0.5 0.12 70);
   --warn-soft: oklch(0.96 0.05 85);
+  /* Monitoring chart, "told to try again": lighter than --bad so the two causes differ in lightness, not only hue;
+     the line keeps 3:1 against white, the wash reads amber over the grey bars. */
+  --warn-line: oklch(0.66 0.14 68);
+  --warn-wash: oklch(0.8 0.14 78);
   --bad: oklch(0.52 0.19 27);
   --bad-soft: oklch(0.96 0.03 27);
   --info: oklch(0.45 0.1 256);
