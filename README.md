@@ -124,6 +124,7 @@ src/app/api           /api/burst (SSE), /api/ask (SSE and JSON), /api/demo/ask (
 db/schema.sql         the library in Postgres
 scripts               eval gate, screenshots, word list, optional real-API smoke test
 e2e                   Playwright tests
+design                scripts that draw the mark, the token-budget diagram and the social card (design/build.sh; see DESIGN-NOTES.md)
 ```
 
 ---
