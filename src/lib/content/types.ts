@@ -1,5 +1,8 @@
 export type DocumentStatus = "approved" | "draft" | "superseded";
 
+/** Where the lines are used: on a call, in an email, or anywhere. */
+export type DocumentChannel = "any" | "call" | "email";
+
 export interface LibraryLine {
   /** Stable ID, for example OBJ-1.2: document code, section, line. */
   id: string;
@@ -20,6 +23,7 @@ export interface LibraryDocument {
   code: string;
   slug: string;
   title: string;
+  channel: DocumentChannel;
   version: number;
   status: DocumentStatus;
   approvedOn: string;
@@ -37,6 +41,7 @@ export interface DocumentInput {
   code: string;
   slug: string;
   title: string;
+  channel: DocumentChannel;
   version: number;
   status: DocumentStatus;
   approvedOn: string;
@@ -49,6 +54,7 @@ export function defineDocument(input: DocumentInput): LibraryDocument {
     code: input.code,
     slug: input.slug,
     title: input.title,
+    channel: input.channel,
     version: input.version,
     status: input.status,
     approvedOn: input.approvedOn,

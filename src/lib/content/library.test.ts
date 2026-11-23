@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { retrieveLines } from "../coach/retrieval";
+import { scoreLines } from "../coach/retrieval";
+import { analyzeQuestion } from "../coach/text";
 import { ANSWER_BANK } from "./answer-bank";
 import { CATALOG, currentDocuments, validateLibrary } from "./catalog";
 import { ALL_DOCUMENTS } from "./library";
@@ -18,8 +19,8 @@ describe("document library", () => {
 
   it("never searches a superseded version", () => {
     expect(CATALOG.excluded.map((doc) => `${doc.slug} v${doc.version}`)).toEqual(["objection-playbook v2"]);
-    const old = retrieveLines("I understand. What would you say the problem is costing you?");
-    expect(old.ranked.every((hit) => !hit.ref.line.id.startsWith("OBJ2"))).toBe(true);
+    const old = scoreLines(analyzeQuestion("I understand. What would you say the problem is costing you?"), undefined, true);
+    expect(old.every((hit) => !hit.ref.line.id.startsWith("OBJ2"))).toBe(true);
   });
 
   it("points every bank entry at a current approved line", () => {
@@ -30,9 +31,9 @@ describe("document library", () => {
     }
   });
 
-  it("can retrieve every approved line from its own text (no content is silently blocked)", () => {
+  it("ranks every approved line first for its own text (no content is silently blocked)", () => {
     for (const ref of CATALOG.scripts) {
-      expect(retrieveLines(ref.line.text).best?.ref.line.id, ref.line.text).toBe(ref.line.id);
+      expect(scoreLines(analyzeQuestion(ref.line.text), undefined, true)[0]?.ref.line.id, ref.line.text).toBe(ref.line.id);
     }
   });
 });

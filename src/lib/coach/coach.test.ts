@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getLine } from "../content/catalog";
-import { FOLLOW_UP_PROMPT, NO_MATCH_TEXT, answerQuestion } from "./coach";
+import { CLARIFY_TEXT, FOLLOW_UP_PROMPT, NO_MATCH_TEXT, answerQuestion } from "./coach";
 import { containsVerbatim } from "./text";
 
 describe("coach answers", () => {
@@ -10,6 +10,8 @@ describe("coach answers", () => {
     expect(answer.text).toBe(getLine("OBJ-5.2").line.text);
     expect(answer.followUp?.prompt).toBe(FOLLOW_UP_PROMPT);
     expect(answer.followUp?.why).toBe(getLine("OBJ-5.1").line.text);
+    // "needs" is a real word: nothing to correct.
+    expect(answer.trace.corrections).toEqual([]);
   });
 
   it("falls back to the exact source line with a citation", () => {
@@ -34,9 +36,34 @@ describe("coach answers", () => {
   });
 
   it("declines instead of giving generic advice", () => {
-    const answer = answerQuestion("What's the best CRM for a small team?");
-    expect(answer.path).toBe("no-match");
-    expect(answer.text).toBe(NO_MATCH_TEXT);
+    for (const question of ["What's the best CRM for a small team?", "How do I bake a cake?", "They want to see a case study first"]) {
+      const answer = answerQuestion(question);
+      expect(answer.path, question).toBe("no-match");
+      expect(answer.text).toBe(NO_MATCH_TEXT);
+      expect(answer.quote).toBeUndefined();
+      expect(answer.trace.corrections, question).toEqual([]);
+    }
+  });
+
+  it("fixes typos only when the question as typed matched nothing", () => {
+    const answer = answerQuestion("pirce is to hihg they say");
+    expect(answer.quote?.lineId).toBe("OBJ-1.2");
+    expect(answer.trace.corrections.map((c) => c.to)).toEqual(["price", "high"]);
+  });
+
+  it("asks which situation when two fit, then answers with the one the rep picks", () => {
+    const answer = answerQuestion("How do I close a sale?");
+    expect(answer.path).toBe("clarify");
+    expect(answer.text).toBe(CLARIFY_TEXT);
     expect(answer.quote).toBeUndefined();
+    const lineIds = answer.options!.map((o) => o.lineId);
+    expect(lineIds).toContain("CLS-5.2");
+    const picked = answerQuestion("How do I close a sale?", { pick: "CLS-5.2" });
+    expect(picked).toMatchObject({ path: "retrieval", chosen: true, text: getLine("CLS-5.2").line.text });
+  });
+
+  it("ignores a pick that is not an approved script line", () => {
+    expect(answerQuestion("How do I close a sale?", { pick: "CLS-5.1" }).path).toBe("clarify");
+    expect(answerQuestion("How do I close a sale?", { pick: "NOPE-1.2" }).path).toBe("clarify");
   });
 });
