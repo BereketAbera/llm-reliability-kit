@@ -48,6 +48,8 @@ export interface CoachAnswer {
     content: string[];
     corrections: Array<{ from: string; to: string }>;
     bankDecision: BankDecision | "skipped";
+    /** Two bank entries tied and the line search clearly preferred one of them. */
+    tieBreak?: { chosen: string; over: string };
     bankCandidates: Array<{ id: string; intent: string; score: number; keywordHit: boolean; similarity: number }>;
     retrievalDecision: RetrievalResult["decision"] | "skipped";
     retrievalReason: string;
@@ -204,7 +206,7 @@ export function answerQuestion(question: string, options: CoachOptions = {}): Co
         bank: { id: winner.entry.id, intent: winner.entry.intent, score: winner.score, via: winner.keywordHit ? "keyword" : "intent", approvedBy: winner.entry.approvedBy, approvedOn: winner.entry.approvedOn },
         followUp: { prompt: FOLLOW_UP_PROMPT, why: ref.section.why.text },
         guard: { checked: true, ok: true, action: "none" },
-        trace: { ...trace, bankDecision: "matched" },
+        trace: { ...trace, bankDecision: "matched", tieBreak: { chosen: winner.entry.id, over: (winner === first ? second : first).entry.id } },
       };
     }
     return {

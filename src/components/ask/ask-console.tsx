@@ -447,7 +447,13 @@ function Trace({ answer }: { answer: CoachAnswer }) {
             <p className="text-xs font-medium text-muted-foreground">
               1. Answer bank (threshold {trace.threshold}):{" "}
               <span className="text-foreground">
-                {trace.bankDecision === "matched" ? "matched" : trace.bankDecision === "ambiguous" ? "two entries too close, so the coach asks which one" : "nothing above threshold, so it falls back"}
+                {trace.tieBreak
+                  ? `${trace.tieBreak.chosen} and ${trace.tieBreak.over} were too close to call; the line search clearly preferred ${trace.tieBreak.chosen}`
+                  : trace.bankDecision === "matched"
+                    ? "matched"
+                    : trace.bankDecision === "ambiguous"
+                      ? "two entries too close, so the coach asks which one"
+                      : "nothing above threshold, so it falls back"}
               </span>
             </p>
             {bankShared ? (

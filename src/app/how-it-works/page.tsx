@@ -81,9 +81,9 @@ export default function HowItWorksPage() {
               </li>
               <li>
                 <strong>Find out whose limit it is.</strong> The app calls OpenAI through Replit&apos;s AI integration, so first confirm whether the 429
-                comes from Replit&apos;s proxy or from an OpenAI account you control. The answer decides the fix: with Replit&apos;s shared limit you
-                cannot raise the tier, so moving to your own key with a known tier may be the real change. Every rep, and every server instance, shares
-                whichever budget that is.
+                comes from Replit&apos;s proxy or from an OpenAI account you control. The answer decides the fix: if the limit belongs to the
+                integration, you may not be able to raise it yourself, and moving to your own key with a known tier may be the real change. Every rep,
+                and every server instance, shares whichever budget that is.
               </li>
               <li>
                 <strong>Check max_tokens.</strong> A generous value reserves budget the short coaching answer never uses.

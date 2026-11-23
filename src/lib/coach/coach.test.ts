@@ -62,6 +62,13 @@ describe("coach answers", () => {
     expect(picked).toMatchObject({ path: "retrieval", chosen: true, text: getLine("CLS-5.2").line.text });
   });
 
+  it("breaks a tie between two bank entries only when the line search clearly prefers one", () => {
+    const answer = answerQuestion("They told me there's no budget for this until next year.");
+    expect(answer).toMatchObject({ path: "answer-bank", bank: { id: "AB-02" } });
+    expect(answer.trace.tieBreak).toEqual({ chosen: "AB-02", over: "AB-06" });
+    expect(answerQuestion("The prospect went quiet after my proposal").path).toBe("clarify");
+  });
+
   it("ignores a pick that is not an approved script line", () => {
     expect(answerQuestion("How do I close a sale?", { pick: "CLS-5.1" }).path).toBe("clarify");
     expect(answerQuestion("How do I close a sale?", { pick: "NOPE-1.2" }).path).toBe("clarify");
