@@ -48,11 +48,17 @@ export class SSEParser {
     return messages;
   }
 
+  /** True when the stream ended part-way through an event (that event is dropped). */
+  droppedPartial = false;
+
+  /**
+   * End of stream. Per the SSE spec, an event without its closing blank line is
+   * incomplete and is discarded, never dispatched.
+   */
   flush(): SSEMessage[] {
-    const rest = this.buffer;
+    this.droppedPartial = this.buffer.trim().length > 0;
     this.buffer = "";
-    const message = rest.trim() ? parseBlock(rest) : null;
-    return message ? [message] : [];
+    return [];
   }
 }
 

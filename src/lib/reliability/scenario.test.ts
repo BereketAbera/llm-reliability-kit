@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { HARSH_ERROR, createResilientClient } from "./clients";
+import { answerQuestion } from "../coach/coach";
+import { HARSH_ERROR, calmMessage, createResilientClient } from "./clients";
 import { VirtualClock } from "./clock";
 import { SimulatedProvider } from "./provider";
 import { seededRandom } from "./random";
-import { DEFAULT_PARAMS, PRESETS, buildMessages, runComparison, runVariant } from "./scenario";
+import { BURST_QUESTIONS, DEFAULT_PARAMS, PRESETS, buildMessages, runComparison, runVariant } from "./scenario";
 import { readSSE } from "./sse";
 import type { ChatRequestBody } from "./types";
 
@@ -93,6 +94,8 @@ describe("burst scenario (seed 7)", () => {
     for (const timeline of resilient.timelines.filter((t) => t.outcome === "error")) {
       expect(timeline.error).toMatchObject({ code: "busy", retryable: true });
       expect(timeline.error?.userMessage).not.toBe(HARSH_ERROR);
+      // Nothing is saved or retried for the rep, so the message must not say so.
+      expect(timeline.error?.userMessage).not.toMatch(/saved|will retry/);
     }
     const trimmed = await runVariant(preset.params, "trimmed");
     expect(trimmed.summary.failed).toBe(0);
@@ -109,5 +112,28 @@ describe("burst scenario (seed 7)", () => {
     expect(result.error?.code).toBe("too_large");
     expect(provider.stats.accepted + provider.stats.rejected).toBe(0);
     expect(events).toEqual(["error"]);
+  });
+});
+
+describe("burst questions", () => {
+  it("are questions the answer bank does not cover, so each one calls the model", () => {
+    expect(BURST_QUESTIONS.length).toBeGreaterThanOrEqual(3);
+    for (const question of BURST_QUESTIONS) expect(answerQuestion(question).path, question).toBe("retrieval");
+  });
+
+  it("carry the approved line each rep should see", async () => {
+    const { resilient } = await runComparison(DEFAULT_PARAMS);
+    for (const timeline of resilient.timelines) {
+      expect(timeline.lineId).toBeDefined();
+      expect(timeline.text).toBe(answerQuestion(timeline.question).quote?.text);
+    }
+  });
+});
+
+describe("calm busy message", () => {
+  it("says when to try again, and never quotes a wait longer than the client would wait", () => {
+    expect(calmMessage(20_000, 45_000)).toBe("Lots of reps are asking right now. Tap Try again in about 20 seconds.");
+    expect(calmMessage(78_000, 45_000)).toBe("Lots of reps are asking right now. Tap Try again in a minute or two.");
+    expect(calmMessage(undefined)).toBe("Lots of reps are asking right now. Tap Try again in a moment.");
   });
 });

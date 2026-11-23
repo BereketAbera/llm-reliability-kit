@@ -11,6 +11,8 @@ export interface Segment {
 export interface RequestTimeline {
   id: number;
   question: string;
+  /** The approved line this question is answered with. */
+  lineId?: string;
   promptTokens: number;
   arrivedAt: number;
   segments: Segment[];
@@ -48,6 +50,7 @@ export function applyEvent(timelines: Map<number, RequestTimeline>, event: Clien
     timelines.set(event.id, {
       id: event.id,
       question: event.question,
+      lineId: event.lineId,
       promptTokens: event.promptTokens,
       arrivedAt: event.t,
       segments: [],
@@ -125,8 +128,11 @@ export interface VariantSummary {
   successRate: number;
   rateLimited: number;
   retries: number;
+  /** Typical answer time (median) for answered requests. */
   p50Ms?: number;
   p95Ms?: number;
+  /** Slowest answer time for answered requests. */
+  maxMs?: number;
   finishedAtMs: number;
 }
 
@@ -143,6 +149,7 @@ export function summarize(timelines: RequestTimeline[]): VariantSummary {
     retries: timelines.reduce((sum, t) => sum + Math.max(0, t.attempts - 1), 0),
     p50Ms: percentile(latencies, 50),
     p95Ms: percentile(latencies, 95),
+    maxMs: latencies.length ? Math.max(...latencies) : undefined,
     finishedAtMs: Math.max(0, ...timelines.map((t) => t.endedAt ?? 0)),
   };
 }

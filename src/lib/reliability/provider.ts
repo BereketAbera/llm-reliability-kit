@@ -23,6 +23,8 @@ export interface SimulatedProviderOptions {
   /** Extra time before the first token per 1,000 prompt tokens (reading the prompt is not free). */
   prefillMsPerThousand?: number;
   outputTokensPerSecond?: number;
+  /** Returns true when the simulated model should reword the approved line (for the monitoring day). */
+  rewrites?: () => boolean;
 }
 
 export interface ProviderStats {
@@ -41,12 +43,18 @@ function formatWait(ms: number): string {
   return `${Math.ceil(ms)}ms`;
 }
 
-/** The simulated model quotes the approved line it was given, or declines. Deterministic. */
-export function simulatedCompletion(body: ChatRequestBody): string {
+/** The approved line a prompt carries, if any. */
+export function approvedLineIn(body: ChatRequestBody): { id: string; text: string } | undefined {
   const text = body.messages.map((m) => m.content).join("\n");
   const match = text.match(/APPROVED LINE \[([A-Z0-9.-]+)\]: "([^"]+)"/);
-  if (!match) return "I can only answer from the approved material. Try asking about a specific objection, email or call moment.";
-  return `Say this, word for word: "${match[2]}" Then stop and let them answer.`;
+  return match ? { id: match[1], text: match[2] } : undefined;
+}
+
+/** The simulated model returns the approved line it was given word for word, or declines. Deterministic. */
+export function simulatedCompletion(body: ChatRequestBody, reword = false): string {
+  const line = approvedLineIn(body);
+  if (!line) return "I can only answer from the approved material. Try asking about a specific objection, email or call moment.";
+  return reword ? `Try something like: ${line.text.split(" ").slice(0, -3).join(" ")}...` : line.text;
 }
 
 function chunkWords(text: string): string[] {
@@ -78,6 +86,7 @@ export class SimulatedProvider {
       baseFirstTokenMs: 300,
       prefillMsPerThousand: 35,
       outputTokensPerSecond: 50,
+      rewrites: () => false,
       ...options,
     };
     const { tier, clock, otherTrafficTpm } = this.options;
@@ -154,14 +163,14 @@ export class SimulatedProvider {
   private stream(body: ChatRequestBody, promptTokens: number, signal?: AbortSignal): Response {
     const { clock, baseFirstTokenMs, prefillMsPerThousand, outputTokensPerSecond } = this.options;
     const id = `chatcmpl-sim-${++this.counter}`;
-    const text = simulatedCompletion(body);
+    const text = simulatedCompletion(body, this.options.rewrites());
     const pieces = chunkWords(text);
     const msPerToken = 1000 / outputTokensPerSecond;
     const firstTokenMs = baseFirstTokenMs + (promptTokens / 1000) * prefillMsPerThousand;
     const completionTokens = estimateTextTokens(text);
     const model = body.model;
 
-    async function* generate(): AsyncGenerator<Uint8Array> {
+    async function* chunks(): AsyncGenerator<Uint8Array> {
       await clock.sleep(firstTokenMs);
       for (let i = 0; i < pieces.length; i++) {
         if (signal?.aborted) return;
@@ -176,7 +185,7 @@ export class SimulatedProvider {
       yield encoder.encode("data: [DONE]\n\n");
     }
 
-    const iterator = generate();
+    const iterator = chunks();
     const stream = new ReadableStream<Uint8Array>({
       async pull(controller) {
         const { value, done } = await iterator.next();

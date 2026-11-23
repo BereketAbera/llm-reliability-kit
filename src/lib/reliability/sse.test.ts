@@ -25,4 +25,21 @@ describe("SSE", () => {
     for await (const message of readSSE(body)) seen.push(message.data);
     expect(seen).toEqual(["line one\nline two", "[DONE]"]);
   });
+
+  it("drops an event the stream cut off before its closing blank line", async () => {
+    const encoder = new TextEncoder();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode(encodeSSE("delta", { text: "That helps, " }) + 'event: delta\ndata: {"text":"thank yo'));
+        controller.close();
+      },
+    });
+    const seen: string[] = [];
+    for await (const message of readSSE(body)) seen.push(message.data);
+    expect(seen).toEqual(['{"text":"That helps, "}']);
+    const parser = new SSEParser();
+    parser.push("data: half");
+    expect(parser.flush()).toEqual([]);
+    expect(parser.droppedPartial).toBe(true);
+  });
 });

@@ -1,6 +1,6 @@
 import { answerQuestion } from "../coach/coach";
-import { ANSWER_BANK } from "../content/answer-bank";
 import { CATALOG } from "../content/catalog";
+import { EVAL_SUITE } from "../content/eval-suite";
 import { DEFAULT_BACKOFF } from "./backoff";
 import { createNaiveClient, createResilientClient, type ClientEvent, type CoachClient, type CoachRequest } from "./clients";
 import { VirtualClock, realSleep } from "./clock";
@@ -16,9 +16,9 @@ export const VARIANT_KEYS: VariantKey[] = ["naive", "resilient", "trimmed"];
 export interface ScenarioParams {
   /** Reps asking within the same second. */
   concurrency: number;
-  /** Prompt size with whole documents pasted in. */
+  /** Prompt size today (assumed to be mostly pasted reference text). */
   promptTokens: number;
-  /** Prompt size with trimmed retrieval context. */
+  /** Prompt size with only the matched section and top lines (a target, padded to this size here). */
   trimmedTokens: number;
   maxOutputTokens: number;
   tpm: number;
@@ -61,7 +61,8 @@ export const PRESETS: Preset[] = [
   {
     key: "post",
     label: "Three at once",
-    description: "The scenario from the logs: three reps ask together, about 14,500 prompt tokens each, on a 30,000 tokens-per-minute tier.",
+    description:
+      "The scenario in your post: three reps ask together with prompts of about 14,500 tokens. The 30,000 tokens-per-minute limit is an assumption (Tier 1 for gpt-4o-class models); the x-ratelimit-limit-tokens header on one of your 429s confirms the real number.",
     params: DEFAULT_PARAMS,
   },
   {
@@ -80,16 +81,18 @@ export const PRESETS: Preset[] = [
 
 export const VARIANTS: Record<VariantKey, { title: string; summary: string }> = {
   naive: {
-    title: "Naive client",
+    title: "Today’s client (no retry)",
     summary: "Sends every request the moment it arrives. No queue, no retry. A 429 reaches the rep as an error.",
   },
   resilient: {
-    title: "Resilient client",
-    summary: "Estimates tokens first and waits in a local token bucket, caps concurrency at 4, retries with full-jitter backoff that honors retry-after (4 retries max), and says \"busy, try again\" calmly when the wait would pass 45 seconds.",
+    title: "With retry queue",
+    summary:
+      "Estimates tokens first and waits in a local token bucket, caps concurrency at 4, retries with full-jitter backoff that honors retry-after (4 retries max), and tells the rep calmly to try again when the wait would pass 45 seconds.",
   },
   trimmed: {
-    title: "Resilient + trimmed context",
-    summary: "The same client, but retrieval sends the matched section and top lines (about 4,000 tokens) instead of whole documents.",
+    title: "+ smaller prompts",
+    summary:
+      "The same retry queue, with prompts cut to the matched section and top lines. The demo pads prompts to a 4,000-token target; on your app the size comes from a token count of real prompts, and the trim ships only if the 30-question score holds.",
   },
 };
 
@@ -166,8 +169,20 @@ export interface RunOptions {
   keepDeltas?: boolean;
 }
 
+/**
+ * Burst questions are ones the answer bank does not cover, so each one goes to
+ * retrieval and calls the model. Answer-bank hits never call the model, so they
+ * cannot cause a 429.
+ */
+export const BURST_QUESTIONS: string[] = EVAL_SUITE.map((testCase) => testCase.question).filter((question) => answerQuestion(question).path === "retrieval");
+
 export function questionsFor(count: number): string[] {
-  return Array.from({ length: count }, (_, i) => ANSWER_BANK[(i * 7) % ANSWER_BANK.length].examples[0]);
+  return Array.from({ length: count }, (_, i) => BURST_QUESTIONS[i % BURST_QUESTIONS.length]);
+}
+
+/** The approved line the coach would quote for a question, if any. */
+export function approvedLineId(question: string): string | undefined {
+  return answerQuestion(question).quote?.lineId;
 }
 
 /** Runs one variant on a fresh provider and a virtual clock. Same params and seed, same result. */
@@ -210,7 +225,7 @@ export async function runVariant(params: ScenarioParams, variant: VariantKey, op
   const task = Promise.all(
     requests.map(async (request) => {
       await clock.sleep(request.at);
-      emit({ type: "arrive", id: request.id, t: clock.now(), promptTokens: estimatePromptTokens(request.messages), question: request.question });
+      emit({ type: "arrive", id: request.id, t: clock.now(), promptTokens: estimatePromptTokens(request.messages), question: request.question, lineId: approvedLineId(request.question) });
       return client.complete(request, emit);
     }),
   );

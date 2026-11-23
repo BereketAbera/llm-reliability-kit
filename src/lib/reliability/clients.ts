@@ -16,7 +16,12 @@ import { perMinuteBucket, type TokenBucket } from "./token-bucket";
 import type { ChatMessage, ChatRequestBody, RateLimits, Transport, Usage } from "./types";
 
 export const CHAT_URL = "https://api.openai.com/v1/chat/completions";
-export const DEFAULT_MODEL = "gpt-4o-mini";
+/**
+ * The scenario assumes a 30,000 tokens-per-minute limit, which is what OpenAI's
+ * Tier 1 listed for gpt-4o-class models (gpt-4o-mini had far more). Confirm the
+ * real number from x-ratelimit-limit-tokens on one of your own 429s.
+ */
+export const DEFAULT_MODEL = "gpt-4o";
 export const HARSH_ERROR = "The coaching response could not finish";
 
 export interface CoachRequest {
@@ -40,7 +45,7 @@ export interface CoachError {
 }
 
 export type ClientEvent =
-  | { type: "arrive"; id: number; t: number; promptTokens: number; question: string }
+  | { type: "arrive"; id: number; t: number; promptTokens: number; question: string; lineId?: string }
   | { type: "queued"; id: number; t: number; reason: "concurrency" | "tokens"; waitMs?: number }
   | { type: "send"; id: number; t: number; attempt: number; estimatedTokens: number }
   | {
@@ -190,12 +195,18 @@ class BusyError extends Error {
   }
 }
 
-export function calmMessage(retryAfterMs?: number): string {
+/**
+ * What a rep sees when the budget is full. It promises only what happens: nothing
+ * is queued or retried for them, so it says when to tap Try again, and never
+ * quotes a wait longer than the client would have waited itself.
+ */
+export function calmMessage(retryAfterMs?: number, maxWaitMs = 45_000): string {
   if (retryAfterMs === undefined || !Number.isFinite(retryAfterMs)) {
-    return "Lots of reps are asking right now. Your question is saved; tap Try again in a moment.";
+    return "Lots of reps are asking right now. Tap Try again in a moment.";
   }
+  if (retryAfterMs > maxWaitMs) return "Lots of reps are asking right now. Tap Try again in a minute or two.";
   const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
-  return `Lots of reps are asking right now. Your question is saved and will retry in about ${seconds} seconds.`;
+  return `Lots of reps are asking right now. Tap Try again in about ${seconds} seconds.`;
 }
 
 export const WAITING_MESSAGE = "Busy moment. Your answer is queued and will start shortly.";
@@ -281,7 +292,7 @@ export function createResilientClient(options: ResilientClientOptions): CoachCli
           retryable: true,
           retryAfterMs: projectedMs,
           message: `Queue needs about ${Math.round(projectedMs / 1000)} s of token budget before this request`,
-          userMessage: calmMessage(projectedMs),
+          userMessage: calmMessage(projectedMs, maxWaitMs),
         });
       }
       // excerpt:end shed
@@ -342,7 +353,7 @@ export function createResilientClient(options: ResilientClientOptions): CoachCli
             code: "interrupted",
             retryable: true,
             message: streamError instanceof Error ? streamError.message : String(streamError),
-            userMessage: "The answer was interrupted. Tap Try again; your question is saved.",
+            userMessage: "The answer was interrupted. Tap Try again.",
           });
         }
       } catch (error) {
@@ -360,7 +371,7 @@ export function createResilientClient(options: ResilientClientOptions): CoachCli
             retryAfterMs,
             providerStatus: error instanceof BusyError ? undefined : 429,
             message: error.message,
-            userMessage: calmMessage(retryAfterMs),
+            userMessage: calmMessage(retryAfterMs, maxWaitMs),
           });
         }
         // excerpt:end clean-error
@@ -368,7 +379,7 @@ export function createResilientClient(options: ResilientClientOptions): CoachCli
           code: "provider_error",
           retryable: true,
           message: error instanceof Error ? error.message : String(error),
-          userMessage: "Something went wrong on our side. Your question is saved; tap Try again.",
+          userMessage: "Something went wrong on our side. Tap Try again.",
         });
       } finally {
         leaveBacklog();
