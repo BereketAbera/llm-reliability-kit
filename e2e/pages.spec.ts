@@ -49,6 +49,16 @@ test.describe("burst lab", () => {
     await expect(resilient.getByText("The coaching response could not finish")).toHaveCount(0);
   });
 
+  test("sliders are named and keyboard operable", async ({ page }) => {
+    await page.goto("/burst");
+    const reps = page.getByRole("slider", { name: "Reps asking at once" });
+    await expect(reps).toHaveAttribute("aria-valuenow", "3");
+    await reps.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(reps).toHaveAttribute("aria-valuenow", "4");
+    await expect(page.getByText("Settings changed.", { exact: false })).toBeVisible();
+  });
+
   test("shared-key preset shows retries and calm busy messages", async ({ page }) => {
     await page.goto("/burst");
     await page.getByRole("button", { name: "Shared key, busy hour" }).click();

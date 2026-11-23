@@ -356,7 +356,7 @@ function SliderField({
         <Label id={`${id}-label`}>{label}</Label>
         <span className="text-sm font-semibold tabular">{display}</span>
       </div>
-      <Slider aria-labelledby={`${id}-label`} value={[value]} min={min} max={max} step={step} onValueChange={(v) => onChange(v[0] ?? value)} disabled={disabled} />
+      <Slider aria-labelledby={`${id}-label`} valueText={display} value={[value]} min={min} max={max} step={step} onValueChange={(v) => onChange(v[0] ?? value)} disabled={disabled} />
     </div>
   );
 }
