@@ -58,8 +58,8 @@ export default function EvalPage() {
             </p>
             <CodeBlock className="mt-3" label=".replit" code={replit} wrap />
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              A GitHub Actions workflow that runs the same checks on every pull request is an optional extra. In this demo repo it has not run in CI
-              yet, because the repo has not been pushed; its deploy step only runs by hand and skips itself when no deploy token is set.
+              A GitHub Actions workflow that runs the same checks on every pull request is an optional extra. In this demo repo it runs on every
+              push to main; its deploy step only runs by hand and skips itself when no deploy token is set.
             </p>
             <CodeBlock className="mt-3" label=".github/workflows/publish-gate.yml" code={workflow} collapsed="See the workflow file" />
           </div>

@@ -78,7 +78,7 @@ If a unit test fails, the build fails, or the 30-question score drops, the build
 
 ### GitHub Actions (optional)
 
-`.github/workflows/publish-gate.yml` runs lint, typecheck, unit tests and the build, starts the build, and runs `pnpm eval --url` against it on every pull request and push. The deploy job runs only when started by hand on `main` and skips itself when no `VERCEL_TOKEN` secret is set. This repo has not been pushed, so the workflow has not run in CI yet. `vercel.json` turns off Git-triggered deploys so nothing can bypass the gate through Vercel's Git integration.
+`.github/workflows/publish-gate.yml` runs lint, typecheck, unit tests and the build, starts the build, and runs `pnpm eval --url` against it on every pull request and push. The deploy job runs only when started by hand on `main` and skips itself when no `VERCEL_TOKEN` secret is set. In this repo it runs on every push to `main`. `vercel.json` turns off Git-triggered deploys so nothing can bypass the gate through Vercel's Git integration.
 
 ## How state works
 
